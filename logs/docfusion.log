@@ -1,0 +1,88 @@
+[2026-04-24 12:33:48] INFO docfusion: Reading document: data.json (type=json, role=source)
+[2026-04-24 12:33:48] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 12:33:48] INFO docfusion: Reading document: data.json (type=json, role=source)
+[2026-04-24 12:33:48] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 12:33:48] INFO docfusion: Reading document: data.json (type=json, role=source)
+[2026-04-24 12:33:48] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 12:34:38] INFO docfusion: [smoke1] 启动处理流程: 1 个 source, 1 个 template
+[2026-04-24 12:34:38] INFO docfusion: 清理历史输出、旧上传目录和缓存
+[2026-04-24 12:34:38] INFO docfusion: Cleaning runtime artifacts before processing
+[2026-04-24 12:34:38] INFO docfusion: Reading document: source.csv (type=csv, role=source)
+[2026-04-24 12:34:38] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 12:34:38] INFO docfusion: Parsing requirement: 提取 Name、Value、Date 并填入模板
+[2026-04-24 12:34:38] INFO docfusion:   -> time_range=None, entities=[], indicators=['Name', 'Value', 'Date 并填入模板'], filters={}, granularity=按模板字段填充
+[2026-04-24 12:34:38] INFO docfusion: Parsing template: template.csv (type=csv)
+[2026-04-24 12:34:38] INFO docfusion:   -> 1 tables, 3 fields, 0 placeholders, type=tabular
+[2026-04-24 12:34:38] INFO docfusion: Retrieving evidence from 1 documents for template with 1 tables, 3 fields
+[2026-04-24 12:34:38] INFO docfusion:   -> Found 1 table candidates, 3 text candidates
+[2026-04-24 12:34:38] INFO docfusion:     source 'source.csv': 2 rows matched
+[2026-04-24 12:34:38] INFO docfusion: Filling template: /tmp/tmp4ajva0jl/template.csv (type=csv) -> /home/match/LLM-DocFusion/outputs/template_filled_smoke1_1.csv
+[2026-04-24 12:34:38] INFO docfusion:   -> Fill rate: 100.0%, 2 rows
+[2026-04-24 12:34:38] INFO docfusion: Validating result for: /tmp/tmp4ajva0jl/template.csv
+[2026-04-24 12:34:38] INFO docfusion:   -> Validation: 28/30 checks passed
+[2026-04-24 12:34:45] INFO docfusion: [smoke2] 启动处理流程: 1 个 source, 1 个 template
+[2026-04-24 12:34:45] INFO docfusion: 清理历史输出、旧上传目录和缓存
+[2026-04-24 12:34:45] INFO docfusion: Cleaning runtime artifacts before processing
+[2026-04-24 12:34:45] INFO docfusion: Reading document: source.csv (type=csv, role=source)
+[2026-04-24 12:34:45] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 12:34:45] INFO docfusion: Parsing requirement: 提取 Name、Value、Date 并填入模板
+[2026-04-24 12:34:45] INFO docfusion:   -> time_range=None, entities=[], indicators=['Name', 'Value', 'Date 并填入模板'], filters={}, granularity=按模板字段填充
+[2026-04-24 12:34:45] INFO docfusion: Parsing template: template.csv (type=csv)
+[2026-04-24 12:34:45] INFO docfusion:   -> 1 tables, 3 fields, 0 placeholders, type=tabular
+[2026-04-24 12:34:45] INFO docfusion: Retrieving evidence from 1 documents for template with 1 tables, 3 fields
+[2026-04-24 12:34:45] INFO docfusion:   -> Found 1 table candidates, 3 text candidates
+[2026-04-24 12:34:45] INFO docfusion:     source 'source.csv': 2 rows matched
+[2026-04-24 12:34:45] INFO docfusion: Filling template: /tmp/tmplwiafugp/template.csv (type=csv) -> /home/match/LLM-DocFusion/outputs/template_filled_smoke2_1.csv
+[2026-04-24 12:34:45] INFO docfusion:   -> Fill rate: 100.0%, 2 rows
+[2026-04-24 12:34:45] INFO docfusion: Validating result for: /tmp/tmplwiafugp/template.csv
+[2026-04-24 12:34:45] INFO docfusion:   -> Validation: 28/30 checks passed
+[2026-04-24 12:35:50] INFO docfusion: Reading document: data.json (type=json, role=source)
+[2026-04-24 12:35:50] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 12:35:50] INFO docfusion: Reading document: data.json (type=json, role=source)
+[2026-04-24 12:35:50] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 12:35:58] INFO docfusion: Parsing requirement: 将日期从2020/7/1到2020/8/31的数据填入模板中
+[2026-04-24 12:35:58] INFO docfusion:   -> time_range=['2020-07-01', '2020-08-31'], entities=[], indicators=[], filters={}, granularity=按模板字段填充
+[2026-04-24 12:35:58] INFO docfusion: Parsing requirement: 
+    表一：
+        监测时间：2025-11-25 09:00:00.0
+        城市：德州市
+    表二：
+        监测时间：2025-11-25 09:00:00.
+[2026-04-24 12:35:58] INFO docfusion:   -> time_range=['2025-11-01', '2025-11-31'], entities=['2025-11-25 09:00:00.0', '德州市', '潍坊市'], indicators=[], filters={'监测时间': ['2025-11-25 09:00:00.0']}, granularity=逐条记录
+[2026-04-24 12:35:58] INFO docfusion: Parsing requirement: 帮我智能填表
+[2026-04-24 12:35:58] INFO docfusion:   -> time_range=None, entities=[], indicators=[], filters={}, granularity=按模板字段填充
+[2026-04-24 12:35:58] INFO docfusion: Parsing requirement: 根据数据源中的空气质量监测数据，将监测时间为2025-11-25 09:00:00.0的数据填入模板。
+[2026-04-24 12:35:58] INFO docfusion:   -> time_range=['2025-11-01', '2025-11-31'], entities=[], indicators=[], filters={'监测时间': ['2025-11-25 09:00:00.0']}, granularity=按模板字段填充
+[2026-04-24 12:35:58] INFO docfusion: Reading document: tmpu4vnwhzy.csv (type=csv, role=source)
+[2026-04-24 12:35:58] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 12:35:58] INFO docfusion: Reading document: tmpwwlryfuz.txt (type=text, role=source)
+[2026-04-24 12:35:58] INFO docfusion:   -> 2 text blocks, 0 tables
+[2026-04-24 12:35:58] INFO docfusion: Reading document: tmp7h12ds9n.md (type=markdown, role=source)
+[2026-04-24 12:35:58] INFO docfusion:   -> 2 text blocks, 1 tables
+[2026-04-24 12:35:58] INFO docfusion: Parsing template: tmp_x5l0qeo.csv (type=csv)
+[2026-04-24 12:35:58] INFO docfusion:   -> 1 tables, 3 fields, 0 placeholders, type=tabular
+[2026-04-24 12:35:58] INFO docfusion: Parsing template: tmppveam8h7.txt (type=text)
+[2026-04-24 12:35:58] INFO docfusion:   -> 0 tables, 6 fields, 6 placeholders, type=text
+[2026-04-24 12:35:58] INFO docfusion: Reading document: tmpu76w2w5a.txt (type=text, role=source)
+[2026-04-24 12:35:58] INFO docfusion:   -> 2 text blocks, 0 tables
+[2026-04-24 12:35:58] INFO docfusion: Validating result for: /home/match/LLM-DocFusion/backend/tests/test_basic.py
+[2026-04-24 12:35:58] INFO docfusion:   -> Validation: 24/29 checks passed
+[2026-04-24 12:35:58] INFO docfusion: Filling template: /tmp/tmpyp3b87_f/template.xlsx (type=excel) -> /tmp/tmpyp3b87_f/output.xlsx
+[2026-04-24 12:35:58] INFO docfusion:   -> Fill rate: 100.0%, 3 rows
+[2026-04-24 12:36:21] INFO docfusion: [f1e5f9b1] 启动处理流程: 1 个 source, 1 个 template
+[2026-04-24 12:36:21] INFO docfusion: 清理历史输出、旧上传目录和缓存
+[2026-04-24 12:36:21] INFO docfusion: Cleaning runtime artifacts before processing
+[2026-04-24 12:36:21] INFO docfusion: Reading document: sales.csv (type=csv, role=source)
+[2026-04-24 12:36:21] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 12:36:21] INFO docfusion: Parsing requirement: 提取 name 和 amount 填入模板
+[2026-04-24 12:36:21] INFO docfusion:   -> time_range=None, entities=[], indicators=['name 和 amount 填入模板'], filters={}, granularity=按模板字段填充
+[2026-04-24 12:36:21] INFO docfusion: Parsing template: sales-template.csv (type=csv)
+[2026-04-24 12:36:21] INFO docfusion:   -> 1 tables, 2 fields, 0 placeholders, type=tabular
+[2026-04-24 12:36:21] INFO docfusion: Retrieving evidence from 1 documents for template with 1 tables, 2 fields
+[2026-04-24 12:36:21] INFO docfusion:   -> Found 1 table candidates, 2 text candidates
+[2026-04-24 12:36:21] INFO docfusion:     source 'sales.csv': 2 rows matched
+[2026-04-24 12:36:21] INFO docfusion: Filling template: /tmp/tmpofy5rgv_/sales-template.csv (type=csv) -> /home/match/LLM-DocFusion/outputs/sales-template_filled_f1e5f9b1_1.csv
+[2026-04-24 12:36:21] INFO docfusion:   -> Fill rate: 100.0%, 2 rows
+[2026-04-24 12:36:21] INFO docfusion: Validating result for: /tmp/tmpofy5rgv_/sales-template.csv
+[2026-04-24 12:36:21] INFO docfusion:   -> Validation: 30/30 checks passed
+[2026-04-24 12:36:21] INFO docfusion: Cleaning runtime artifacts after processing

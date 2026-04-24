@@ -1,0 +1,34 @@
+{
+    "llm": {
+        "preferred_backend": "ollama",
+        "fallback_enabled": true,
+        "ollama": {
+            "api_base": "http://localhost:11434",
+            "model_name": "qwen2.5:14b",
+            "temperature": 0.3,
+            "num_predict": 512,
+            "num_gpu": -1,
+            "num_thread": 8,
+            "keep_alive": "30m",
+            "use_cache": true,
+            "preload_timeout": 120
+        }
+    },
+    "experiment": {
+        "test_data_dir": "测试集",
+        "output_dir": "results",
+        "log_dir": "logs"
+    },
+    "processing": {
+        "max_input_length": 6000,
+        "chunk_size": 6000,
+        "output_format": "xlsx",
+        "timeout": 300
+    },
+    "optimization": {
+        "template_cache_size": 50,
+        "batch_write": true,
+        "preload_templates": true,
+        "max_retries": 3
+    }
+}

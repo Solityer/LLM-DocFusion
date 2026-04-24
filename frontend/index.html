@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DocFusion - 文档理解与多源数据融合系统</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1>📄 DocFusion</h1>
+            <p class="subtitle">基于大语言模型的文档理解与多源数据融合系统</p>
+            <div id="model-status" class="model-status">
+                <span class="status-dot offline"></span>
+                <span id="model-info">检查模型状态...</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Upload Section -->
+        <section class="card">
+            <h2>📁 文档上传</h2>
+            <div class="upload-grid">
+                <div class="upload-zone" id="source-zone">
+                    <div class="upload-area" id="source-drop">
+                        <div class="upload-icon">📄</div>
+                        <p>拖拽或点击上传<strong>数据源文件</strong></p>
+                        <p class="hint">支持 xlsx, docx, md, txt, csv, json</p>
+                        <input type="file" id="source-input" multiple accept=".xlsx,.xls,.docx,.md,.txt,.csv,.json" hidden>
+                    </div>
+                    <div id="source-list" class="file-list"></div>
+                </div>
+                <div class="upload-zone" id="template-zone">
+                    <div class="upload-area" id="template-drop">
+                        <div class="upload-icon">📋</div>
+                        <p>拖拽或点击上传<strong>模板文件</strong></p>
+                        <p class="hint">任意支持格式均可作为模板</p>
+                        <input type="file" id="template-input" multiple accept=".xlsx,.xls,.docx,.md,.txt,.csv" hidden>
+                    </div>
+                    <div id="template-list" class="file-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Requirement Section -->
+        <section class="card">
+            <h2>📝 用户要求</h2>
+            <div id="auto-req-hint" style="display:none;background:#eff6ff;border:1px solid #93c5fd;border-radius:6px;padding:0.4rem 0.75rem;margin-bottom:0.5rem;font-size:0.82rem;color:#1d4ed8"></div>
+            <textarea id="requirement" rows="4" placeholder="请输入您的数据填表要求（可留空，系统将自动识别）...&#10;&#10;示例：将数据中日期从2020/7/1到2020/8/31的数据填入模板中"></textarea>
+            <div class="options-row">
+                <label class="toggle">
+                    <input type="checkbox" id="use-llm" checked>
+                    <span class="toggle-slider"></span>
+                    LLM 增强模式
+                </label>
+                <label class="toggle">
+                    <input type="checkbox" id="strict-mode">
+                    <span class="toggle-slider"></span>
+                    严格匹配
+                </label>
+                <button class="btn btn-primary" id="process-btn" onclick="startProcess()">
+                    🚀 开始处理
+                </button>
+            </div>
+        </section>
+
+        <!-- Processing Steps -->
+        <section class="card" id="steps-section" style="display:none">
+            <h2>⚙️ 处理流程</h2>
+            <div class="task-summary">
+                <div class="task-meta">
+                    <div class="task-meta-item">
+                        <span class="task-meta-label">任务 ID</span>
+                        <strong id="task-id">-</strong>
+                    </div>
+                    <div class="task-meta-item">
+                        <span class="task-meta-label">当前阶段</span>
+                        <strong id="task-stage-text">等待开始</strong>
+                    </div>
+                    <div class="task-meta-item">
+                        <span class="task-meta-label">整体进度</span>
+                        <strong id="task-progress-text">0%</strong>
+                    </div>
+                </div>
+                <div class="task-progress-shell">
+                    <div class="task-progress-bar" id="task-progress-bar"></div>
+                </div>
+                <div id="task-model-usage" class="model-usage-box"></div>
+                <div class="template-status-list" id="template-status-list"></div>
+            </div>
+            <div class="steps" id="steps-container">
+                <div class="step" data-step="cleanup">
+                    <span class="step-icon">🧹</span>
+                    <span class="step-label">环境清理</span>
+                    <span class="step-status">等待</span>
+                </div>
+                <div class="step" data-step="parse">
+                    <span class="step-icon">📖</span>
+                    <span class="step-label">文档解析</span>
+                    <span class="step-status">等待</span>
+                </div>
+                <div class="step" data-step="template">
+                    <span class="step-icon">📋</span>
+                    <span class="step-label">模板解析</span>
+                    <span class="step-status">等待</span>
+                </div>
+                <div class="step" data-step="requirement">
+                    <span class="step-icon">📝</span>
+                    <span class="step-label">需求解析</span>
+                    <span class="step-status">等待</span>
+                </div>
+                <div class="step" data-step="retrieve">
+                    <span class="step-icon">🔍</span>
+                    <span class="step-label">证据检索</span>
+                    <span class="step-status">等待</span>
+                </div>
+                <div class="step" data-step="extract">
+                    <span class="step-icon">⛏️</span>
+                    <span class="step-label">数据抽取</span>
+                    <span class="step-status">等待</span>
+                </div>
+                <div class="step" data-step="fill">
+                    <span class="step-icon">✏️</span>
+                    <span class="step-label">模板填充</span>
+                    <span class="step-status">等待</span>
+                </div>
+                <div class="step" data-step="validate">
+                    <span class="step-icon">✅</span>
+                    <span class="step-label">结果验证</span>
+                    <span class="step-status">等待</span>
+                </div>
+                <div class="step" data-step="output">
+                    <span class="step-icon">📦</span>
+                    <span class="step-label">输出生成</span>
+                    <span class="step-status">等待</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section class="card" id="results-section" style="display:none">
+            <h2>📊 处理结果</h2>
+            <div id="results-container"></div>
+        </section>
+
+        <!-- Logs Section -->
+        <section class="card" id="logs-section" style="display:none">
+            <h2>📜 处理日志</h2>
+            <div class="log-container" id="log-container"></div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <p>DocFusion v1.0 | 基于 Ollama + qwen2.5:14b 本地部署</p>
+    </footer>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

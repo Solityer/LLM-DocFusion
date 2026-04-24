@@ -1,0 +1,42 @@
+{
+  "version": "1.0",
+  "description": "通用字段语义、别名与质量规则注册表，可按业务继续扩展。",
+  "null_tokens": ["", "nan", "none", "null", "n/a", "na", "-", "--", "—", "无", "空", "缺失", "未知"],
+  "field_types": {
+    "entity": {
+      "aliases": ["名称", "姓名", "实体", "对象", "主体", "单位", "机构", "企业", "组织", "城市", "地区", "国家", "省份", "站点", "name", "entity", "object", "organization", "company", "city", "region", "country"],
+      "patterns": ["名称$", "name$"]
+    },
+    "date": {
+      "aliases": ["日期", "时间", "年月", "年份", "月份", "统计日期", "填报时间", "监测时间", "date", "time", "year", "month", "period"],
+      "patterns": ["日期", "时间", "date", "time"]
+    },
+    "number": {
+      "aliases": ["数量", "数值", "总量", "金额", "收入", "支出", "价格", "单价", "售价", "成本", "销量", "人口", "面积", "指数", "分数", "score", "amount", "number", "count", "qty", "quantity", "value", "price", "cost", "sales"],
+      "patterns": ["数$", "量$", "值$", "金额", "价格", "price", "amount", "count"]
+    },
+    "percent": {
+      "aliases": ["比例", "占比", "百分比", "率", "增长率", "同比", "环比", "percent", "percentage", "rate", "ratio"],
+      "patterns": ["率$", "占比", "percent", "rate", "ratio"]
+    },
+    "currency": {
+      "aliases": ["金额", "价格", "售价", "单价", "收入", "支出", "预算", "成本", "currency", "money", "price", "revenue", "expense"],
+      "patterns": ["金额", "价格", "收入", "支出", "price", "revenue"]
+    }
+  },
+  "canonical_fields": {
+    "price": ["价格", "售价", "单价", "销售价格", "成交价", "price", "unit_price", "sale_price"],
+    "date": ["日期", "时间", "统计日期", "填报时间", "监测时间", "date", "time", "period"],
+    "entity_name": ["名称", "姓名", "城市", "地区", "国家", "单位", "机构", "企业", "name", "entity", "city", "region", "country", "company"],
+    "quantity": ["数量", "销量", "件数", "人数", "总数", "quantity", "qty", "count", "number"],
+    "amount": ["金额", "总额", "收入", "支出", "成本", "利润", "amount", "revenue", "expense", "cost", "profit"],
+    "rate": ["比例", "占比", "增长率", "同比", "环比", "率", "rate", "ratio", "percent"]
+  },
+  "quality_rules": {
+    "missing_required_ratio": 0.5,
+    "low_confidence_threshold": 0.45,
+    "numeric_outlier_zscore": 3.5,
+    "duplicate_key_min_fields": 2
+  },
+  "units": ["元", "万元", "亿元", "美元", "万", "亿", "个", "件", "人", "万人", "平方米", "平方公里", "吨", "千克", "%", "百分比"]
+}
