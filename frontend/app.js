@@ -29,6 +29,36 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAnalyticsDashboard();
 });
 
+// ── Store button event delegation (avoids inline-onclick quoting bugs) ─────────
+document.addEventListener('click', async (event) => {
+    const button = event.target.closest('[data-store-action]');
+    if (!button) return;
+
+    const action = button.dataset.storeAction;
+    const documentId = button.dataset.documentId;
+
+    if (!documentId) {
+        const statusDiv = document.getElementById('store-task-status');
+        if (statusDiv) { statusDiv.style.display = ''; statusDiv.style.background = '#fee2e2'; statusDiv.textContent = '缺少 document_id，无法执行操作'; }
+        return;
+    }
+
+    try {
+        if (action === 'detail') {
+            await viewStoredDocument(documentId);
+        } else if (action === 'export') {
+            await exportStoredDocument(documentId);
+        } else if (action === 'checkout') {
+            await checkoutStoredDocument(documentId);
+        } else if (action === 'delete') {
+            await deleteStoredDocument(documentId);
+        }
+    } catch (error) {
+        const statusDiv = document.getElementById('store-task-status');
+        if (statusDiv) { statusDiv.style.display = ''; statusDiv.style.background = '#fee2e2'; statusDiv.textContent = error.message || String(error); }
+    }
+});
+
 // ── Upload zones ──────────────────────────────────────────────────────────────
 function setupUploadZones() {
     setupDropZone('source-drop', 'source-input', 'source-list', 'source');
@@ -560,7 +590,7 @@ async function loadStoreDocs() {
         data.documents.forEach(doc => {
             const qCount = doc.quality_issue_count;
             const qDisplay = qCount >= 1000 ? '1000+' : qCount;
-            const docIdJson = JSON.stringify(doc.document_id);
+            const docId = escHtml(doc.document_id || doc.id || '');
             html += `<tr>
                 <td title="${escHtml(doc.source_file)}">${escHtml(truncateText(doc.title || doc.source_name || '', 30))}</td>
                 <td>${escHtml(doc.file_type || '')}</td>
@@ -571,10 +601,10 @@ async function loadStoreDocs() {
                 <td title="${qCount >= 1000 ? '仅展示前 1000 条质量问题' : ''}">${qDisplay}</td>
                 <td style="font-size:0.75rem">${escHtml((doc.created_at || '').slice(0, 16))}</td>
                 <td style="white-space:nowrap">
-                    <button onclick="viewStoredDocument(${docIdJson})" style="font-size:0.75rem;padding:0.15rem 0.4rem;margin:0.1rem;border:1px solid var(--border);border-radius:4px;cursor:pointer;background:#fff">详情</button>
-                    <button onclick="exportStoredDocument(${docIdJson})" style="font-size:0.75rem;padding:0.15rem 0.4rem;margin:0.1rem;border:1px solid var(--border);border-radius:4px;cursor:pointer;background:#fff">导出</button>
-                    <button onclick="checkoutStoredDocument(${docIdJson})" style="font-size:0.75rem;padding:0.15rem 0.4rem;margin:0.1rem;border:1px solid #93c5fd;border-radius:4px;cursor:pointer;background:#eff6ff;color:#1d4ed8">出库</button>
-                    <button onclick="deleteStoredDocument(${docIdJson})" style="font-size:0.75rem;padding:0.15rem 0.4rem;margin:0.1rem;border:1px solid #fca5a5;border-radius:4px;cursor:pointer;background:#fef2f2;color:#dc2626">删除</button>
+                    <button data-store-action="detail" data-document-id="${docId}" style="font-size:0.75rem;padding:0.15rem 0.4rem;margin:0.1rem;border:1px solid var(--border);border-radius:4px;cursor:pointer;background:#fff">详情</button>
+                    <button data-store-action="export" data-document-id="${docId}" style="font-size:0.75rem;padding:0.15rem 0.4rem;margin:0.1rem;border:1px solid var(--border);border-radius:4px;cursor:pointer;background:#fff">导出</button>
+                    <button data-store-action="checkout" data-document-id="${docId}" style="font-size:0.75rem;padding:0.15rem 0.4rem;margin:0.1rem;border:1px solid #93c5fd;border-radius:4px;cursor:pointer;background:#eff6ff;color:#1d4ed8">出库</button>
+                    <button data-store-action="delete" data-document-id="${docId}" style="font-size:0.75rem;padding:0.15rem 0.4rem;margin:0.1rem;border:1px solid #fca5a5;border-radius:4px;cursor:pointer;background:#fef2f2;color:#dc2626">删除</button>
                 </td>
             </tr>`;
         });

@@ -1,0 +1,30 @@
+{
+  "task_id": "6e99e9c3",
+  "status": "error",
+  "data_source_count": 0,
+  "source_type_distribution": {},
+  "template_count": 1,
+  "field_match_rate": 0.0,
+  "fill_rate": 0.0,
+  "quality_issue_count": 0,
+  "quality_issue_distribution": {},
+  "low_confidence_fields": [],
+  "conflict_fields": [],
+  "response_time": 0.01616048812866211,
+  "llm_call_count": 0,
+  "validation_failures": [],
+  "before_after": [
+    {
+      "template_file": "/home/match/LLM-DocFusion/uploads/071ba23d/template.csv",
+      "output_file": "",
+      "rows_filled": 0,
+      "field_count": 0,
+      "fill_rate": 0.0
+    }
+  ],
+  "outputs": [],
+  "warnings": [
+    "模板 template.csv 处理失败: requirement 为空时必须启用本地 Ollama qwen2.5:14b 进行语义推断",
+    "requirement 为空时必须启用本地 Ollama qwen2.5:14b 进行语义推断"
+  ]
+}
