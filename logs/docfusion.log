@@ -301,3 +301,7 @@
 [2026-04-24 14:43:46] INFO docfusion:   -> 1 tables, 6 fields, 0 placeholders, type=tabular
 [2026-04-24 14:43:46] INFO docfusion: Filling template: /tmp/tmpcr3sh3t4/template.xlsx (type=excel) -> /tmp/tmpcr3sh3t4/output.xlsx
 [2026-04-24 14:43:46] INFO docfusion:   -> Fill rate: 100.0%, 3 rows
+[2026-04-24 14:51:54] INFO docfusion: DocFusion store initialized at /home/match/LLM-DocFusion/data/docfusion_store.sqlite
+[2026-04-24 14:51:54] INFO docfusion: DocFusion server starting...
+[2026-04-24 14:51:54] INFO docfusion: Project root: /home/match/LLM-DocFusion
+[2026-04-24 14:51:54] INFO docfusion: Frontend dir: /home/match/LLM-DocFusion/frontend
