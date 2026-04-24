@@ -466,11 +466,17 @@ def main():
     parser.add_argument("--base", default="http://localhost:8000", help="Base URL")
     parser.add_argument("--skip-process", action="store_true",
                         help="Skip long-running process tests")
+    parser.add_argument("--quick", action="store_true",
+                        help="Quick mode: skip long-running process/local and multisource tests (same as --skip-process)")
     args = parser.parse_args()
     global BASE
     BASE = args.base.rstrip("/")
 
-    print(f"\nDocFusion Smoke Test — {BASE}\n{'=' * 60}")
+    skip_process = args.skip_process or args.quick
+    mode = "QUICK" if skip_process else "FULL"
+    print(f"\nDocFusion Smoke Test [{mode}] — {BASE}\n{'=' * 60}")
+    if skip_process:
+        print("  (--quick/--skip-process: skipping process/local and multisource tests)")
 
     # Check server is up
     try:
@@ -491,7 +497,7 @@ def main():
     test_evaluate_compare()
     test_sources_preview()
     test_outputs_list()
-    if not args.skip_process:
+    if not skip_process:
         test_main_process_flow()
         test_multisource()
 
