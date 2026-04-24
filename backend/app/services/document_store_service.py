@@ -1,6 +1,6 @@
 """SQLite document data asset store service.
 
-Satisfies the competition requirement for "extracting information and storing in a database".
+Supports document import, search, export, checkout, and deletion.
 Uses only Python standard library sqlite3 - no heavy dependencies.
 """
 from __future__ import annotations
@@ -536,8 +536,28 @@ def get_document_detail(document_id: str) -> dict[str, Any] | None:
                 "SELECT * FROM tables WHERE document_id=? LIMIT 20", (document_id,)
             ).fetchall()
 
-            sample_blocks = conn.execute(
-                "SELECT content FROM text_blocks WHERE document_id=? LIMIT 3", (document_id,)
+            text_blocks = conn.execute(
+                "SELECT block_index, heading_level, content FROM text_blocks WHERE document_id=? "
+                "ORDER BY block_index LIMIT 5",
+                (document_id,),
+            ).fetchall()
+
+            entities = conn.execute(
+                "SELECT entity_text, entity_type, normalized_entity, confidence, evidence_snippet "
+                "FROM extracted_entities WHERE document_id=? LIMIT 20",
+                (document_id,),
+            ).fetchall()
+
+            fields = conn.execute(
+                "SELECT field_name, canonical_field, value, normalized_value, field_type, confidence "
+                "FROM extracted_fields WHERE document_id=? LIMIT 20",
+                (document_id,),
+            ).fetchall()
+
+            quality_issues = conn.execute(
+                "SELECT issue_type, severity, field_name, raw_value, reason, suggestion "
+                "FROM quality_issues WHERE document_id=? ORDER BY severity DESC LIMIT 20",
+                (document_id,),
             ).fetchall()
 
             return {
@@ -564,7 +584,46 @@ def get_document_detail(document_id: str) -> dict[str, Any] | None:
                     }
                     for t in tables
                 ],
-                "sample_text_blocks": [b["content"][:200] for b in sample_blocks],
+                "text_blocks": [
+                    {
+                        "block_index": b["block_index"],
+                        "heading_level": b["heading_level"],
+                        "content": b["content"] or "",
+                    }
+                    for b in text_blocks
+                ],
+                "entities": [
+                    {
+                        "entity_text": e["entity_text"] or "",
+                        "entity_type": e["entity_type"] or "",
+                        "normalized_entity": e["normalized_entity"] or "",
+                        "confidence": e["confidence"],
+                        "evidence_snippet": e["evidence_snippet"] or "",
+                    }
+                    for e in entities
+                ],
+                "fields": [
+                    {
+                        "field_name": f["field_name"] or "",
+                        "canonical_field": f["canonical_field"] or "",
+                        "value": f["value"] or "",
+                        "normalized_value": f["normalized_value"] or "",
+                        "field_type": f["field_type"] or "",
+                        "confidence": f["confidence"],
+                    }
+                    for f in fields
+                ],
+                "quality_issues": [
+                    {
+                        "issue_type": q["issue_type"] or "",
+                        "severity": q["severity"] or "",
+                        "field_name": q["field_name"] or "",
+                        "raw_value": q["raw_value"] or "",
+                        "reason": q["reason"] or "",
+                        "suggestion": q["suggestion"] or "",
+                    }
+                    for q in quality_issues
+                ],
             }
         finally:
             conn.close()
@@ -744,6 +803,125 @@ def get_quality_issues(
             }
         finally:
             conn.close()
+
+
+# ── Document export / checkout / delete ──────────────────────────────────────
+
+def export_document_package(document_id: str, output_dir: Path) -> dict[str, Any]:
+    """Export all data for a document to a JSON file.
+
+    Creates ``outputs/document_export_{document_id}_{timestamp}.json``.
+    Does NOT remove the document from the database.
+    """
+    with _DB_LOCK:
+        conn = _get_connection()
+        try:
+            row = conn.execute(
+                "SELECT * FROM documents WHERE document_id=?", (document_id,)
+            ).fetchone()
+            if not row:
+                raise ValueError(f"Document not found: {document_id}")
+
+            doc_data: dict[str, Any] = dict(row)
+            doc_data["metadata"] = json.loads(doc_data.pop("metadata_json") or "{}")
+
+            text_blocks = [dict(r) for r in conn.execute(
+                "SELECT * FROM text_blocks WHERE document_id=?", (document_id,)
+            ).fetchall()]
+
+            tables = [dict(r) for r in conn.execute(
+                "SELECT * FROM tables WHERE document_id=?", (document_id,)
+            ).fetchall()]
+            for t in tables:
+                t["headers"] = json.loads(t.pop("headers_json") or "[]")
+
+            table_rows = [dict(r) for r in conn.execute(
+                "SELECT * FROM table_rows WHERE document_id=?", (document_id,)
+            ).fetchall()]
+
+            entities = [dict(r) for r in conn.execute(
+                "SELECT * FROM extracted_entities WHERE document_id=?", (document_id,)
+            ).fetchall()]
+
+            fields = [dict(r) for r in conn.execute(
+                "SELECT * FROM extracted_fields WHERE document_id=?", (document_id,)
+            ).fetchall()]
+
+            quality_issues = [dict(r) for r in conn.execute(
+                "SELECT * FROM quality_issues WHERE document_id=?", (document_id,)
+            ).fetchall()]
+        finally:
+            conn.close()
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    ts = time.strftime("%Y%m%d_%H%M%S")
+    filename = f"document_export_{document_id}_{ts}.json"
+    output_file = output_dir / filename
+
+    package: dict[str, Any] = {
+        "export_version": "1.0",
+        "exported_at": _ts(),
+        "document": doc_data,
+        "text_blocks": text_blocks,
+        "tables": tables,
+        "table_rows": table_rows,
+        "entities": entities,
+        "fields": fields,
+        "quality_issues": quality_issues,
+    }
+
+    with open(output_file, "w", encoding="utf-8") as fh:
+        json.dump(package, fh, ensure_ascii=False, indent=2, default=str)
+
+    logger.info(f"Exported document {document_id} to {output_file}")
+    return {
+        "status": "ok",
+        "document_id": document_id,
+        "output_file": str(output_file),
+        "download_url": f"/api/download/{filename}",
+        "removed": False,
+    }
+
+
+def delete_document(document_id: str) -> dict[str, Any]:
+    """Delete a document and all its associated data from the SQLite store.
+
+    Does NOT delete the original upload file from disk.
+    Raises ValueError if the document does not exist.
+    """
+    with _DB_LOCK:
+        conn = _get_connection()
+        try:
+            row = conn.execute(
+                "SELECT 1 FROM documents WHERE document_id=?", (document_id,)
+            ).fetchone()
+            if not row:
+                raise ValueError(f"Document not found: {document_id}")
+            _delete_document(conn, document_id)
+            conn.commit()
+            logger.info(f"Deleted document {document_id} from store")
+            return {"status": "ok", "document_id": document_id, "deleted": True}
+        except Exception:
+            conn.rollback()
+            raise
+        finally:
+            conn.close()
+
+
+def checkout_document(
+    document_id: str,
+    output_dir: Path,
+    remove_after_export: bool = True,
+) -> dict[str, Any]:
+    """Export document to a JSON package, then optionally remove it from the store.
+
+    Export always happens first; deletion only proceeds if export succeeds.
+    """
+    result = export_document_package(document_id, output_dir)
+    if remove_after_export:
+        delete_document(document_id)
+        result["removed"] = True
+    return result
 
 
 def get_stats() -> StoreStats:

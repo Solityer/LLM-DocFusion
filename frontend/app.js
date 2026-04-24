@@ -551,12 +551,16 @@ async function loadStoreDocs() {
         const res = await fetch(API_BASE + '/api/store/documents?limit=50');
         const data = await res.json();
         if (!data.documents || data.documents.length === 0) {
-            panel.innerHTML = '<div style="color:var(--text-secondary);font-size:0.85rem">暂无入库文档。</div>';
+            panel.innerHTML = '<div style="color:var(--text-secondary);font-size:0.85rem">暂无入库文档</div>';
             return;
         }
         let html = `<div style="font-weight:600;font-size:0.88rem;margin-bottom:0.5rem">已入库文档（共 ${data.count} 个）</div>`;
-        html += `<table class="fields-table"><tr><th>文档</th><th>类型</th><th>文本块</th><th>表格</th><th>实体</th><th>字段</th><th>质量问题</th><th>入库时间</th></tr>`;
+        html += `<div style="overflow-x:auto"><table class="fields-table">
+            <tr><th>文档</th><th>类型</th><th>文本块</th><th>表格</th><th>实体</th><th>字段</th><th>质量问题</th><th>入库时间</th><th>操作</th></tr>`;
         data.documents.forEach(doc => {
+            const qCount = doc.quality_issue_count;
+            const qDisplay = qCount >= 1000 ? '1000+' : qCount;
+            const docIdJson = JSON.stringify(doc.document_id);
             html += `<tr>
                 <td title="${escHtml(doc.source_file)}">${escHtml(truncateText(doc.title || doc.source_name || '', 30))}</td>
                 <td>${escHtml(doc.file_type || '')}</td>
@@ -564,11 +568,17 @@ async function loadStoreDocs() {
                 <td>${doc.table_count}</td>
                 <td>${doc.entity_count}</td>
                 <td>${doc.field_count}</td>
-                <td>${doc.quality_issue_count}</td>
+                <td title="${qCount >= 1000 ? '仅展示前 1000 条质量问题' : ''}">${qDisplay}</td>
                 <td style="font-size:0.75rem">${escHtml((doc.created_at || '').slice(0, 16))}</td>
+                <td style="white-space:nowrap">
+                    <button onclick="viewStoredDocument(${docIdJson})" style="font-size:0.75rem;padding:0.15rem 0.4rem;margin:0.1rem;border:1px solid var(--border);border-radius:4px;cursor:pointer;background:#fff">详情</button>
+                    <button onclick="exportStoredDocument(${docIdJson})" style="font-size:0.75rem;padding:0.15rem 0.4rem;margin:0.1rem;border:1px solid var(--border);border-radius:4px;cursor:pointer;background:#fff">导出</button>
+                    <button onclick="checkoutStoredDocument(${docIdJson})" style="font-size:0.75rem;padding:0.15rem 0.4rem;margin:0.1rem;border:1px solid #93c5fd;border-radius:4px;cursor:pointer;background:#eff6ff;color:#1d4ed8">出库</button>
+                    <button onclick="deleteStoredDocument(${docIdJson})" style="font-size:0.75rem;padding:0.15rem 0.4rem;margin:0.1rem;border:1px solid #fca5a5;border-radius:4px;cursor:pointer;background:#fef2f2;color:#dc2626">删除</button>
+                </td>
             </tr>`;
         });
-        html += '</table>';
+        html += '</table></div>';
         panel.innerHTML = html;
     } catch (e) {
         panel.innerHTML = `<div class="alert alert-error">加载失败: ${escHtml(e.message)}</div>`;
@@ -577,7 +587,7 @@ async function loadStoreDocs() {
 
 async function searchStore() {
     const q = document.getElementById('store-search-input').value.trim();
-    if (!q) { alert('请输入搜索关键词'); return; }
+    if (!q) { loadStoreDocs(); return; }
 
     const panel = document.getElementById('store-content-panel');
     panel.style.display = '';
@@ -587,7 +597,7 @@ async function searchStore() {
         const res = await fetch(`${API_BASE}/api/store/search?q=${encodeURIComponent(q)}&limit=30`);
         const data = await res.json();
         if (!data.results || data.results.length === 0) {
-            panel.innerHTML = `<div style="color:var(--text-secondary);font-size:0.85rem">未找到「${escHtml(q)}」相关内容。</div>`;
+            panel.innerHTML = `<div style="color:var(--text-secondary);font-size:0.85rem">未找到匹配结果</div>`;
             return;
         }
         let html = `<div style="font-weight:600;font-size:0.88rem;margin-bottom:0.5rem">搜索「${escHtml(q)}」结果（${data.count} 条）</div>`;
@@ -606,6 +616,192 @@ async function searchStore() {
     } catch (e) {
         panel.innerHTML = `<div class="alert alert-error">搜索失败: ${escHtml(e.message)}</div>`;
     }
+}
+
+// ── Store document operations ──────────────────────────────────────────────────
+
+function downloadUrlFor(outputFile) {
+    if (!outputFile) return '';
+    const name = String(outputFile).split('/').pop();
+    return `${API_BASE}/api/download/${encodeURIComponent(name)}`;
+}
+
+function _storeStatusDiv() {
+    const d = document.getElementById('store-task-status');
+    d.style.display = '';
+    return d;
+}
+
+async function viewStoredDocument(documentId) {
+    // Show or create the detail panel below store-content-panel
+    let detailPanel = document.getElementById('store-detail-panel');
+    if (!detailPanel) {
+        detailPanel = document.createElement('div');
+        detailPanel.id = 'store-detail-panel';
+        const contentPanel = document.getElementById('store-content-panel');
+        contentPanel.parentNode.insertBefore(detailPanel, contentPanel.nextSibling);
+    }
+    detailPanel.style.display = '';
+    detailPanel.innerHTML = '<div style="color:var(--text-secondary);font-size:0.85rem;margin-top:0.5rem">加载详情中...</div>';
+
+    try {
+        const res = await fetch(`${API_BASE}/api/store/documents/${encodeURIComponent(documentId)}`);
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+        renderStoredDocumentDetail(data, detailPanel);
+    } catch (e) {
+        detailPanel.innerHTML = `<div class="alert alert-error" style="margin-top:0.5rem">详情加载失败: ${escHtml(e.message)}</div>`;
+    }
+}
+
+function renderStoredDocumentDetail(data, container) {
+    const doc = data;
+    const textBlocks = data.text_blocks || [];
+    const entities = data.entities || [];
+    const fields = data.fields || [];
+    const qualityIssues = data.quality_issues || [];
+    const qTotal = doc.quality_issue_count !== undefined ? doc.quality_issue_count : qualityIssues.length;
+
+    let html = `
+        <div style="border:1px solid var(--border);border-radius:8px;padding:1rem;background:#f8fafc;margin-top:0.75rem">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+                <div style="font-weight:700;font-size:0.95rem">📄 ${escHtml(doc.title || doc.source_name || '文档详情')}</div>
+                <button onclick="document.getElementById('store-detail-panel').style.display='none'"
+                    style="font-size:0.8rem;padding:0.25rem 0.6rem;border:1px solid var(--border);border-radius:4px;cursor:pointer;background:#fff">✕ 关闭</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.4rem;margin-bottom:0.75rem;font-size:0.82rem">
+                <div><strong>类型：</strong>${escHtml(doc.file_type || '-')}</div>
+                <div><strong>来源类型：</strong>${escHtml(doc.source_type || '-')}</div>
+                <div><strong>入库时间：</strong>${escHtml((doc.created_at || '').slice(0, 16))}</div>
+                <div><strong>文本块：</strong>${doc.text_block_count ?? textBlocks.length}</div>
+                <div><strong>表格：</strong>${doc.table_count ?? (data.tables || []).length}</div>
+                <div><strong>实体：</strong>${doc.entity_count ?? entities.length}</div>
+                <div><strong>字段：</strong>${doc.field_count ?? fields.length}</div>
+                <div><strong>质量问题：</strong>${qTotal >= 1000 ? '1000+' : qTotal}</div>
+            </div>`;
+
+    if (textBlocks.length > 0) {
+        html += `<div style="margin-bottom:0.75rem">
+            <div style="font-weight:600;font-size:0.85rem;margin-bottom:0.4rem">文本块预览（前 ${Math.min(textBlocks.length, 5)} 块）</div>`;
+        textBlocks.slice(0, 5).forEach((b, i) => {
+            const c = b.content || '';
+            html += `<div style="font-size:0.8rem;padding:0.3rem 0.5rem;border-left:2px solid var(--primary);margin-bottom:0.3rem;background:#fff">
+                <span style="color:var(--text-secondary)">#${i + 1}</span> ${escHtml(c.slice(0, 200))}${c.length > 200 ? '…' : ''}
+            </div>`;
+        });
+        html += '</div>';
+    }
+
+    if (entities.length > 0) {
+        html += `<div style="margin-bottom:0.75rem">
+            <div style="font-weight:600;font-size:0.85rem;margin-bottom:0.4rem">实体预览（前 ${Math.min(entities.length, 20)} 个）</div>
+            <div style="display:flex;flex-wrap:wrap;gap:0.3rem">`;
+        entities.slice(0, 20).forEach(e => {
+            html += `<span style="font-size:0.78rem;padding:0.15rem 0.4rem;border-radius:4px;background:#ede9fe;color:#5b21b6">[${escHtml(e.entity_type || '?')}] ${escHtml(e.entity_text || '')}</span>`;
+        });
+        html += '</div></div>';
+    }
+
+    if (fields.length > 0) {
+        html += `<div style="margin-bottom:0.75rem">
+            <div style="font-weight:600;font-size:0.85rem;margin-bottom:0.4rem">字段预览（前 ${Math.min(fields.length, 20)} 个）</div>
+            <table class="fields-table"><tr><th>字段名</th><th>值</th><th>标准化值</th><th>置信度</th></tr>`;
+        fields.slice(0, 20).forEach(f => {
+            html += `<tr>
+                <td>${escHtml(f.field_name || '')}</td>
+                <td>${escHtml(String(f.value || '').slice(0, 60))}</td>
+                <td style="color:var(--text-secondary)">${escHtml(String(f.normalized_value || '').slice(0, 40))}</td>
+                <td>${f.confidence != null ? (f.confidence * 100).toFixed(0) + '%' : '-'}</td>
+            </tr>`;
+        });
+        html += '</table></div>';
+    }
+
+    if (qualityIssues.length > 0) {
+        html += `<div>
+            <div style="font-weight:600;font-size:0.85rem;margin-bottom:0.4rem">质量问题预览（前 ${Math.min(qualityIssues.length, 20)} / ${qTotal >= 1000 ? '1000+' : qTotal} 条）</div>
+            <table class="fields-table"><tr><th>类型</th><th>级别</th><th>字段</th><th>建议</th></tr>`;
+        qualityIssues.slice(0, 20).forEach(q => {
+            html += `<tr>
+                <td>${escHtml(q.issue_type || '')}</td>
+                <td style="color:${q.severity === 'high' ? 'var(--danger)' : q.severity === 'medium' ? 'var(--warning)' : 'var(--text-secondary)'}">${escHtml(q.severity || '')}</td>
+                <td>${escHtml(q.field_name || '')}</td>
+                <td style="font-size:0.78rem">${escHtml(q.suggestion || q.reason || '')}</td>
+            </tr>`;
+        });
+        html += '</table></div>';
+    }
+
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+async function exportStoredDocument(documentId) {
+    const statusDiv = _storeStatusDiv();
+    statusDiv.style.background = '#f8fafc';
+    statusDiv.textContent = '导出中...';
+    try {
+        const res = await fetch(`${API_BASE}/api/store/documents/${encodeURIComponent(documentId)}/export`, {
+            method: 'POST',
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+        const dlUrl = downloadUrlFor(data.output_file || data.download_url);
+        statusDiv.style.background = '#f0fdf4';
+        statusDiv.innerHTML = `✅ 导出完成 — <a href="${escHtml(dlUrl)}" target="_blank" style="color:var(--primary)">⬇️ 下载数据包</a>`;
+    } catch (e) {
+        statusDiv.style.background = '#fee2e2';
+        statusDiv.textContent = `导出失败: ${e.message}`;
+    }
+}
+
+async function checkoutStoredDocument(documentId) {
+    if (!confirm('将生成数据包并从库中移除该文档，是否继续？')) return;
+    const statusDiv = _storeStatusDiv();
+    statusDiv.style.background = '#f8fafc';
+    statusDiv.textContent = '出库处理中...';
+    try {
+        const res = await fetch(`${API_BASE}/api/store/documents/${encodeURIComponent(documentId)}/checkout`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ remove_after_export: true }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+        const dlUrl = downloadUrlFor(data.output_file || data.download_url);
+        statusDiv.style.background = '#eff6ff';
+        statusDiv.innerHTML = `✅ 出库完成，文档已从库中移除 — <a href="${escHtml(dlUrl)}" target="_blank" style="color:var(--primary)">⬇️ 下载数据包</a>`;
+        refreshStoreAfterMutation();
+    } catch (e) {
+        statusDiv.style.background = '#fee2e2';
+        statusDiv.textContent = `出库失败: ${e.message}`;
+    }
+}
+
+async function deleteStoredDocument(documentId) {
+    if (!confirm('确认删除该入库文档？此操作只删除数据库记录，不删除原始上传文件。')) return;
+    const statusDiv = _storeStatusDiv();
+    statusDiv.style.background = '#f8fafc';
+    statusDiv.textContent = '删除中...';
+    try {
+        const res = await fetch(`${API_BASE}/api/store/documents/${encodeURIComponent(documentId)}`, {
+            method: 'DELETE',
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || `HTTP ${res.status}`);
+        statusDiv.style.background = '#f0fdf4';
+        statusDiv.textContent = '✅ 文档已从库中删除';
+        refreshStoreAfterMutation();
+    } catch (e) {
+        statusDiv.style.background = '#fee2e2';
+        statusDiv.textContent = `删除失败: ${e.message}`;
+    }
+}
+
+function refreshStoreAfterMutation() {
+    const detailPanel = document.getElementById('store-detail-panel');
+    if (detailPanel) detailPanel.style.display = 'none';
+    loadStoreDocs();
 }
 
 // ── Main Process ──────────────────────────────────────────────────────────────
@@ -819,7 +1015,7 @@ function renderSourceContribution(result) {
     content.innerHTML = html;
 }
 
-// ── Competition Panel ──────────────────────────────────────────────────────────
+// ── Evaluation / Processing Summary Panel ──────────────────────────────────────
 function renderCompetitionPanel(results) {
     if (!results || results.length === 0) return;
     const panel = document.getElementById('competition-panel');
@@ -844,7 +1040,7 @@ function renderCompetitionPanel(results) {
             </div>
             <div class="analytics-card">
                 <div class="stat-value">${results.filter(r => r.meets_minimum).length}/${results.length}</div>
-                <div class="stat-label">模板通过竞赛阈值</div>
+                <div class="stat-label">模板达到目标阈值</div>
             </div>
         </div>`;
 
@@ -1262,7 +1458,7 @@ function showResults(data, partial) {
         const rateClass = result.fill_rate >= 70 ? 'high' : result.fill_rate >= 30 ? 'medium' : 'low';
         const templateName = result.template_file ? result.template_file.split('/').pop() : `模板 ${idx + 1}`;
         const outputName = result.output_file ? result.output_file.split('/').pop() : '';
-        const completionText = result.status === 'completed' ? (result.meets_minimum === false ? '完成 · 未达竞赛阈值' : '通过') : '失败';
+        const completionText = result.status === 'completed' ? (result.meets_minimum === false ? '完成 · 未达目标阈值' : '通过') : '失败';
 
         let fieldsHtml = '';
         if (result.filled_fields && result.filled_fields.length > 0) {
@@ -1306,7 +1502,7 @@ function showResults(data, partial) {
             warningsHtml = `<div style="background:#fef9c3;border:1px solid #fbbf24;border-radius:6px;padding:0.5rem 0.75rem;margin-bottom:0.75rem">${result.warnings.map(w => `<div style="font-size:0.82rem;color:#92400e">⚠️ ${escHtml(w)}</div>`).join('')}</div>`;
         }
         if (result.status === 'completed' && result.meets_minimum === false) {
-            warningsHtml += `<div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:6px;padding:0.5rem 0.75rem;margin-bottom:0.75rem"><div style="font-size:0.82rem;color:#1d4ed8">结果文件已生成，但当前模板尚未满足竞赛最低阈值（填充率 ${result.fill_rate.toFixed(1)}% vs 要求 ≥80%），请结合验证报告继续排查。</div></div>`;
+            warningsHtml += `<div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:6px;padding:0.5rem 0.75rem;margin-bottom:0.75rem"><div style="font-size:0.82rem;color:#1d4ed8">结果文件已生成，但当前模板尚未满足目标阈值（填充率 ${result.fill_rate.toFixed(1)}% vs 要求 ≥80%），请结合验证报告继续排查。</div></div>`;
         }
 
         let evidenceHtml = '';

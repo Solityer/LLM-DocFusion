@@ -1,0 +1,175 @@
+{
+  "task_id": "3b7b1e3c",
+  "provider": "ollama",
+  "model": "qwen2.5:14b",
+  "availability_status": "ok",
+  "summary": {
+    "task_id": "3b7b1e3c",
+    "provider": "ollama",
+    "model": "qwen2.5:14b",
+    "called": true,
+    "model_not_used": false,
+    "total_calls": 2,
+    "successful_calls": 2,
+    "per_stage": {
+      "source_probe": 2
+    },
+    "per_source": {
+      "/home/match/LLM-DocFusion/uploads/8cccd235/中国COVID-19新冠疫情情况.docx": 1,
+      "/home/match/LLM-DocFusion/uploads/8cccd235/COVID-19全球数据集（节选）.xlsx": 1
+    },
+    "per_source_stage": {
+      "/home/match/LLM-DocFusion/uploads/8cccd235/中国COVID-19新冠疫情情况.docx": {
+        "source_probe": 1
+      },
+      "/home/match/LLM-DocFusion/uploads/8cccd235/COVID-19全球数据集（节选）.xlsx": {
+        "source_probe": 1
+      }
+    },
+    "per_template_source_stage": {
+      "/home/match/LLM-DocFusion/uploads/f706da2e/COVID-19 模板.xlsx": {
+        "/home/match/LLM-DocFusion/uploads/8cccd235/中国COVID-19新冠疫情情况.docx": {
+          "source_probe": 1
+        },
+        "/home/match/LLM-DocFusion/uploads/8cccd235/COVID-19全球数据集（节选）.xlsx": {
+          "source_probe": 1
+        }
+      }
+    },
+    "per_template": {
+      "/home/match/LLM-DocFusion/uploads/f706da2e/COVID-19 模板.xlsx": 2
+    },
+    "probe_sources": [
+      "/home/match/LLM-DocFusion/uploads/8cccd235/中国COVID-19新冠疫情情况.docx",
+      "/home/match/LLM-DocFusion/uploads/8cccd235/COVID-19全球数据集（节选）.xlsx"
+    ],
+    "probe_source_calls": {
+      "/home/match/LLM-DocFusion/uploads/8cccd235/中国COVID-19新冠疫情情况.docx": 1,
+      "/home/match/LLM-DocFusion/uploads/8cccd235/COVID-19全球数据集（节选）.xlsx": 1
+    },
+    "fallback_reasons": [
+      "requirement: 已提供显式 requirement，未触发 qwen 自动推断 [/home/match/LLM-DocFusion/uploads/8cccd235/COVID-19全球数据集（节选）.xlsx, /home/match/LLM-DocFusion/uploads/8cccd235/中国COVID-19新冠疫情情况.docx]"
+    ],
+    "trace_file": "/home/match/LLM-DocFusion/outputs/model_trace_3b7b1e3c.json",
+    "sample_trace": {
+      "request_id": "3b7b1e3c-0c42dc13eef1",
+      "timestamp": "2026-04-24T08:29:28.256Z",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "source_file": "/home/match/LLM-DocFusion/uploads/8cccd235/COVID-19全球数据集（节选）.xlsx",
+      "source_files": [
+        "/home/match/LLM-DocFusion/uploads/8cccd235/COVID-19全球数据集（节选）.xlsx"
+      ],
+      "template_file": "/home/match/LLM-DocFusion/uploads/f706da2e/COVID-19 模板.xlsx",
+      "template_files": [
+        "/home/match/LLM-DocFusion/uploads/f706da2e/COVID-19 模板.xlsx"
+      ],
+      "stage_name": "source_probe",
+      "prompt_hash": "efe37bc04b67d9e4",
+      "prompt_length": 339,
+      "response_length": 389,
+      "latency_ms": 8400,
+      "finish_status": "success",
+      "fallback_used": false,
+      "cache_used": false,
+      "probe_only": true,
+      "error": ""
+    },
+    "skip_events": [
+      {
+        "timestamp": "2026-04-24T08:29:09.029Z",
+        "stage": "requirement",
+        "reason": "已提供显式 requirement，未触发 qwen 自动推断",
+        "source_file": "/home/match/LLM-DocFusion/uploads/8cccd235/COVID-19全球数据集（节选）.xlsx",
+        "source_files": [
+          "/home/match/LLM-DocFusion/uploads/8cccd235/COVID-19全球数据集（节选）.xlsx",
+          "/home/match/LLM-DocFusion/uploads/8cccd235/中国COVID-19新冠疫情情况.docx"
+        ],
+        "template_file": "/home/match/LLM-DocFusion/uploads/f706da2e/COVID-19 模板.xlsx",
+        "template_files": [
+          "/home/match/LLM-DocFusion/uploads/f706da2e/COVID-19 模板.xlsx"
+        ]
+      }
+    ],
+    "required_calls": [
+      {
+        "stage": "source_probe",
+        "reason": "叙事 source 语义校准必须真正经过 qwen",
+        "source_file": "/home/match/LLM-DocFusion/uploads/8cccd235/中国COVID-19新冠疫情情况.docx",
+        "source_files": [
+          "/home/match/LLM-DocFusion/uploads/8cccd235/中国COVID-19新冠疫情情况.docx"
+        ],
+        "template_file": "/home/match/LLM-DocFusion/uploads/f706da2e/COVID-19 模板.xlsx",
+        "template_files": [
+          "/home/match/LLM-DocFusion/uploads/f706da2e/COVID-19 模板.xlsx"
+        ]
+      },
+      {
+        "stage": "source_probe",
+        "reason": "叙事 source 语义校准必须真正经过 qwen",
+        "source_file": "/home/match/LLM-DocFusion/uploads/8cccd235/COVID-19全球数据集（节选）.xlsx",
+        "source_files": [
+          "/home/match/LLM-DocFusion/uploads/8cccd235/COVID-19全球数据集（节选）.xlsx"
+        ],
+        "template_file": "/home/match/LLM-DocFusion/uploads/f706da2e/COVID-19 模板.xlsx",
+        "template_files": [
+          "/home/match/LLM-DocFusion/uploads/f706da2e/COVID-19 模板.xlsx"
+        ]
+      }
+    ],
+    "missing_required_calls": [],
+    "validation_errors": [],
+    "degraded": false,
+    "availability_status": "ok"
+  },
+  "entries": [
+    {
+      "request_id": "3b7b1e3c-788592ab6684",
+      "timestamp": "2026-04-24T08:29:19.851Z",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "source_file": "/home/match/LLM-DocFusion/uploads/8cccd235/中国COVID-19新冠疫情情况.docx",
+      "source_files": [
+        "/home/match/LLM-DocFusion/uploads/8cccd235/中国COVID-19新冠疫情情况.docx"
+      ],
+      "template_file": "/home/match/LLM-DocFusion/uploads/f706da2e/COVID-19 模板.xlsx",
+      "template_files": [
+        "/home/match/LLM-DocFusion/uploads/f706da2e/COVID-19 模板.xlsx"
+      ],
+      "stage_name": "source_probe",
+      "prompt_hash": "847a791bccea3733",
+      "prompt_length": 901,
+      "response_length": 340,
+      "latency_ms": 10509,
+      "finish_status": "success",
+      "fallback_used": false,
+      "cache_used": false,
+      "probe_only": true,
+      "error": ""
+    },
+    {
+      "request_id": "3b7b1e3c-0c42dc13eef1",
+      "timestamp": "2026-04-24T08:29:28.256Z",
+      "provider": "ollama",
+      "model": "qwen2.5:14b",
+      "source_file": "/home/match/LLM-DocFusion/uploads/8cccd235/COVID-19全球数据集（节选）.xlsx",
+      "source_files": [
+        "/home/match/LLM-DocFusion/uploads/8cccd235/COVID-19全球数据集（节选）.xlsx"
+      ],
+      "template_file": "/home/match/LLM-DocFusion/uploads/f706da2e/COVID-19 模板.xlsx",
+      "template_files": [
+        "/home/match/LLM-DocFusion/uploads/f706da2e/COVID-19 模板.xlsx"
+      ],
+      "stage_name": "source_probe",
+      "prompt_hash": "efe37bc04b67d9e4",
+      "prompt_length": 339,
+      "response_length": 389,
+      "latency_ms": 8400,
+      "finish_status": "success",
+      "fallback_used": false,
+      "cache_used": false,
+      "probe_only": true,
+      "error": ""
+    }
+  ]
+}

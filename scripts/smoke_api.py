@@ -453,10 +453,140 @@ def test_multisource():
               True)  # fail-soft: task should complete even with bad external source
 
 
+def test_store_document_operations():
+    section("5b. Store Document Detail / Export / Checkout / Delete")
+
+    # First, ensure we have a document in the store
+    txt_bytes = make_txt_doc()
+    upd = req("POST", "/api/store/import/upload",
+              files={"files": ("smoke_ops_test.txt", txt_bytes, "text/plain")},
+              form_data={"extract_entities": "true", "overwrite": "true"})
+    task_id = upd.get("task_id")
+    if task_id:
+        wait_task("/api/store/status", task_id, max_wait=60)
+
+    # Get document list to find a document_id
+    docs = req("GET", "/api/store/documents?limit=5")
+    check("Store has at least one document for operations test",
+          isinstance(docs.get("documents"), list) and len(docs.get("documents", [])) > 0,
+          f"count={docs.get('count', 0)}")
+    if not docs.get("documents"):
+        return
+
+    doc_id = docs["documents"][0]["document_id"]
+
+    # GET /api/store/documents/{document_id} - detail
+    # Use doc_id directly; req() handles URL encoding
+    detail = req("GET", f"/api/store/documents/{doc_id}")
+    check("GET /api/store/documents/{id} ok", detail.get("status") == "ok",
+          str(detail.get("detail", detail.get("status"))))
+    check("Detail has text_blocks list", isinstance(detail.get("text_blocks"), list))
+    check("Detail has entities list", isinstance(detail.get("entities"), list))
+    check("Detail has fields list", isinstance(detail.get("fields"), list))
+    check("Detail has quality_issues list", isinstance(detail.get("quality_issues"), list))
+
+    # GET nonexistent document_id → 404
+    bad = req("GET", "/api/store/documents/nonexistent_id_xyz")
+    check("GET /api/store/documents/nonexistent → 404",
+          bad.get("_http_error") == 404 or "not found" in str(bad.get("detail", "")).lower(),
+          str(bad.get("detail", bad.get("_http_error"))))
+
+    # POST /api/store/documents/{id}/export
+    exp = req("POST", f"/api/store/documents/{doc_id}/export")
+    check("POST /api/store/documents/{id}/export ok", exp.get("status") == "ok",
+          str(exp.get("detail", exp.get("status"))))
+    check("Export has download_url", bool(exp.get("download_url")),
+          str(exp.get("download_url")))
+    check("Export removed=False (export does not delete)", exp.get("removed") is False,
+          str(exp.get("removed")))
+
+    # Download the exported file
+    if exp.get("download_url"):
+        dl_url = exp["download_url"]
+        fname = dl_url.split("/")[-1]
+        try:
+            url = f"{BASE}/api/download/{urllib.parse.quote(fname)}"
+            with urllib.request.urlopen(url, timeout=10) as r:
+                content = r.read()
+            check("Exported JSON file is downloadable", len(content) > 0, f"{len(content)} bytes")
+        except Exception as e:
+            check("Exported JSON file is downloadable", False, str(e))
+
+    # Document should still exist after export (export does not delete)
+    still_there = req("GET", f"/api/store/documents/{doc_id}")
+    check("Document still in store after export", still_there.get("status") == "ok",
+          str(still_there.get("status")))
+
+    # Import a new document for checkout/delete (use overwrite=true to guarantee a fresh one)
+    upd2 = req("POST", "/api/store/import/upload",
+               files={"files": ("smoke_checkout_test.txt", make_txt_doc(), "text/plain")},
+               form_data={"extract_entities": "false", "overwrite": "true"})
+    task_id2 = upd2.get("task_id")
+    checkout_id = None
+    if task_id2:
+        final2 = wait_task("/api/store/status", task_id2, max_wait=60)
+        # Get the imported document id from the latest doc list
+        docs2 = req("GET", "/api/store/documents?limit=5")
+        if docs2.get("documents"):
+            checkout_id = docs2["documents"][0]["document_id"]
+
+    if not checkout_id:
+        checkout_id = doc_id  # fallback
+
+    # POST /api/store/documents/{id}/checkout with remove_after_export=true
+    co = req("POST", f"/api/store/documents/{checkout_id}/checkout",
+             body={"remove_after_export": True})
+    check("POST /api/store/documents/{id}/checkout ok", co.get("status") == "ok",
+          str(co.get("detail", co.get("status"))))
+    check("Checkout has download_url", bool(co.get("download_url")))
+    check("Checkout removed=True", co.get("removed") is True, str(co.get("removed")))
+
+    # Document should no longer exist → 404
+    gone = req("GET", f"/api/store/documents/{checkout_id}")
+    check("Document returns 404 after checkout",
+          gone.get("_http_error") == 404 or "not found" in str(gone.get("detail", "")).lower(),
+          str(gone.get("detail", gone.get("_http_error"))))
+
+    # List should no longer contain the checked-out document_id
+    docs3 = req("GET", "/api/store/documents?limit=100")
+    doc_ids_after = [d["document_id"] for d in docs3.get("documents", [])]
+    check("Checked-out document absent from list", checkout_id not in doc_ids_after,
+          f"found={checkout_id in doc_ids_after}")
+
+    # DELETE /api/store/documents/{id} — use a fresh import
+    upd3 = req("POST", "/api/store/import/upload",
+               files={"files": ("smoke_delete_test.txt", make_txt_doc(), "text/plain")},
+               form_data={"extract_entities": "false", "overwrite": "true"})
+    task_id3 = upd3.get("task_id")
+    delete_id = None
+    if task_id3:
+        wait_task("/api/store/status", task_id3, max_wait=60)
+        docs4 = req("GET", "/api/store/documents?limit=5")
+        if docs4.get("documents"):
+            delete_id = docs4["documents"][0]["document_id"]
+
+    if delete_id:
+        del_r = req("DELETE", f"/api/store/documents/{delete_id}")
+        check("DELETE /api/store/documents/{id} ok",
+              del_r.get("status") == "ok" or del_r.get("deleted") is True,
+              str(del_r.get("detail", del_r.get("status"))))
+
+        # Second delete attempt → 404
+        del_r2 = req("DELETE", f"/api/store/documents/{delete_id}")
+        check("DELETE already-deleted document returns 404",
+              del_r2.get("_http_error") == 404 or "not found" in str(del_r2.get("detail", "")).lower(),
+              str(del_r2.get("detail", del_r2.get("_http_error"))))
+    else:
+        check("DELETE /api/store/documents/{id} ok", False, "Could not get delete_id")
+        check("DELETE already-deleted document returns 404", False, "skipped")
+
+
 def test_outputs_list():
     section("12. Outputs List")
     data = req("GET", "/api/outputs")
     check("GET /api/outputs returns files list", "files" in data, str(type(data.get("files"))))
+
+
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -492,6 +622,7 @@ def main():
     test_template_inspect()
     test_store_stats()
     test_store_import_and_search()
+    test_store_document_operations()
     test_analytics_dashboard()
     test_document_operations()
     test_evaluate_compare()

@@ -402,6 +402,271 @@ def test_entity_extraction_finds_city_names():
     print("✓ test_entity_extraction_finds_city_names passed")
 
 
+def test_store_document_detail():
+    """get_document_detail() should return full preview data including text_blocks, entities, fields."""
+    from app.schemas.models import FileRole
+    from app.services.document_service import read_document
+    from app.services import document_store_service as svc
+
+    with tempfile.TemporaryDirectory() as tmp:
+        _make_temp_db_path(Path(tmp))
+        svc.init_db()
+
+        txt_path = _write_txt(
+            Path(tmp) / "detail_test.txt",
+            "北京市GDP总量达到43760.7亿元，同比增长5.2%。\n上海市2024年地区生产总值为47218.6亿元。\n",
+        )
+
+        bundle = read_document(txt_path, FileRole.SOURCE)
+        result = svc.save_document_bundle(bundle, extract_entities=True)
+        doc_id = result["document_id"]
+
+        detail = svc.get_document_detail(doc_id)
+        assert detail is not None, "Detail should not be None for existing document"
+        assert detail["document_id"] == doc_id
+        assert "text_block_count" in detail
+        assert "entity_count" in detail
+        assert "field_count" in detail
+        assert "quality_issue_count" in detail
+        # Should include preview arrays
+        assert "text_blocks" in detail
+        assert "entities" in detail
+        assert "fields" in detail
+        assert "quality_issues" in detail
+        # At most 5 text blocks in preview
+        assert len(detail["text_blocks"]) <= 5
+        # At most 20 entities
+        assert len(detail["entities"]) <= 20
+        # text_blocks should have expected structure
+        if detail["text_blocks"]:
+            blk = detail["text_blocks"][0]
+            assert "content" in blk
+            assert "block_index" in blk
+
+    print("✓ test_store_document_detail passed")
+
+
+def test_store_document_export():
+    """export_document_package() should create a valid JSON file with version field."""
+    import json
+    from app.schemas.models import FileRole
+    from app.services.document_service import read_document
+    from app.services import document_store_service as svc
+
+    with tempfile.TemporaryDirectory() as tmp:
+        _make_temp_db_path(Path(tmp))
+        svc.init_db()
+
+        csv_path = _write_csv(
+            Path(tmp) / "export_test.csv",
+            "城市,GDP\n南京,18500\n苏州,22718\n",
+        )
+
+        bundle = read_document(csv_path, FileRole.SOURCE)
+        result = svc.save_document_bundle(bundle, extract_entities=True)
+        doc_id = result["document_id"]
+
+        output_dir = Path(tmp) / "exports"
+        export_result = svc.export_document_package(doc_id, output_dir)
+
+        assert export_result["status"] == "ok"
+        assert export_result["document_id"] == doc_id
+        assert export_result["removed"] is False
+        assert export_result["download_url"].startswith("/api/download/")
+
+        output_file = Path(export_result["output_file"])
+        assert output_file.exists(), "Export file should exist"
+        assert output_file.suffix == ".json"
+
+        with open(output_file, encoding="utf-8") as f:
+            pkg = json.load(f)
+
+        assert pkg["export_version"] == "1.0"
+        assert "exported_at" in pkg
+        assert "document" in pkg
+        assert "text_blocks" in pkg
+        assert "tables" in pkg
+        assert "table_rows" in pkg
+        assert "entities" in pkg
+        assert "fields" in pkg
+        assert "quality_issues" in pkg
+        assert pkg["document"]["document_id"] == doc_id
+
+        # Document should still be in the store (not removed)
+        detail = svc.get_document_detail(doc_id)
+        assert detail is not None, "Document should still be in store after export"
+
+    print("✓ test_store_document_export passed")
+
+
+def test_store_document_checkout():
+    """checkout_document(remove_after_export=True) should export and remove from store."""
+    from app.schemas.models import FileRole
+    from app.services.document_service import read_document
+    from app.services import document_store_service as svc
+
+    with tempfile.TemporaryDirectory() as tmp:
+        _make_temp_db_path(Path(tmp))
+        svc.init_db()
+
+        txt_path = _write_txt(
+            Path(tmp) / "checkout_test.txt",
+            "武汉市GDP总量达到20011亿元，成都市地区生产总值为22074亿元。",
+        )
+
+        bundle = read_document(txt_path, FileRole.SOURCE)
+        result = svc.save_document_bundle(bundle, extract_entities=True)
+        doc_id = result["document_id"]
+
+        output_dir = Path(tmp) / "exports"
+        checkout_result = svc.checkout_document(doc_id, output_dir, remove_after_export=True)
+
+        assert checkout_result["status"] == "ok"
+        assert checkout_result["document_id"] == doc_id
+        assert checkout_result["removed"] is True
+        assert Path(checkout_result["output_file"]).exists(), "Export file should exist"
+
+        # Document should no longer be in the store
+        detail = svc.get_document_detail(doc_id)
+        assert detail is None, "Document should be removed from store after checkout"
+
+    print("✓ test_store_document_checkout passed")
+
+
+def test_store_document_checkout_no_remove():
+    """checkout_document(remove_after_export=False) should export but keep in store."""
+    from app.schemas.models import FileRole
+    from app.services.document_service import read_document
+    from app.services import document_store_service as svc
+
+    with tempfile.TemporaryDirectory() as tmp:
+        _make_temp_db_path(Path(tmp))
+        svc.init_db()
+
+        txt_path = _write_txt(
+            Path(tmp) / "keep_test.txt",
+            "重庆市GDP总量达到30145亿元，天津市实现GDP15680亿元。",
+        )
+
+        bundle = read_document(txt_path, FileRole.SOURCE)
+        result = svc.save_document_bundle(bundle)
+        doc_id = result["document_id"]
+
+        output_dir = Path(tmp) / "exports"
+        checkout_result = svc.checkout_document(doc_id, output_dir, remove_after_export=False)
+
+        assert checkout_result["removed"] is False
+        detail = svc.get_document_detail(doc_id)
+        assert detail is not None, "Document should remain in store when remove_after_export=False"
+
+    print("✓ test_store_document_checkout_no_remove passed")
+
+
+def test_store_document_delete():
+    """delete_document() should remove the document and all its data."""
+    from app.schemas.models import FileRole
+    from app.services.document_service import read_document
+    from app.services import document_store_service as svc
+
+    with tempfile.TemporaryDirectory() as tmp:
+        _make_temp_db_path(Path(tmp))
+        svc.init_db()
+
+        csv_path = _write_csv(
+            Path(tmp) / "delete_test.csv",
+            "A,B,C\n1,2,3\n4,5,6\n",
+        )
+
+        bundle = read_document(csv_path, FileRole.SOURCE)
+        result = svc.save_document_bundle(bundle)
+        doc_id = result["document_id"]
+
+        # Verify it's there
+        assert svc.get_document_detail(doc_id) is not None
+
+        # Delete it
+        del_result = svc.delete_document(doc_id)
+        assert del_result["status"] == "ok"
+        assert del_result["deleted"] is True
+        assert del_result["document_id"] == doc_id
+
+        # Should no longer exist
+        assert svc.get_document_detail(doc_id) is None
+
+        # Stats should decrease
+        docs = svc.get_documents()
+        assert not any(d.document_id == doc_id for d in docs)
+
+    print("✓ test_store_document_delete passed")
+
+
+def test_export_then_delete_does_not_delete_on_export_failure():
+    """checkout_document with nonexistent doc_id should raise ValueError before any deletion."""
+    from app.services import document_store_service as svc
+
+    with tempfile.TemporaryDirectory() as tmp:
+        _make_temp_db_path(Path(tmp))
+        svc.init_db()
+
+        output_dir = Path(tmp) / "exports"
+        try:
+            svc.checkout_document("nonexistent_id", output_dir, remove_after_export=True)
+            assert False, "Should have raised ValueError"
+        except ValueError as e:
+            assert "nonexistent_id" in str(e)
+
+    print("✓ test_export_then_delete_does_not_delete_on_export_failure passed")
+
+
+def test_deleted_document_returns_404():
+    """get_document_detail() returns None (API: 404) after deletion."""
+    from app.schemas.models import FileRole
+    from app.services.document_service import read_document
+    from app.services import document_store_service as svc
+
+    with tempfile.TemporaryDirectory() as tmp:
+        _make_temp_db_path(Path(tmp))
+        svc.init_db()
+
+        txt_path = _write_txt(Path(tmp) / "gone.txt", "A document that will be deleted.")
+        bundle = read_document(txt_path, FileRole.SOURCE)
+        result = svc.save_document_bundle(bundle)
+        doc_id = result["document_id"]
+
+        svc.delete_document(doc_id)
+        assert svc.get_document_detail(doc_id) is None, "Deleted document detail should be None"
+        assert svc.get_document_detail("totally_missing") is None
+
+    print("✓ test_deleted_document_returns_404 passed")
+
+
+def test_product_copy_has_no_competition_words():
+    """UI files and README must not contain competition-specific Chinese terms."""
+    competition_words = ["竞赛", "赛题", "参赛", "评委", "作品", "比赛"]
+    # Path relative to tests/ directory: ../../frontend and ../../README.md
+    tests_dir = Path(__file__).parent
+    project_root = tests_dir.parent.parent
+
+    files_to_check = [
+        project_root / "frontend" / "index.html",
+        project_root / "frontend" / "app.js",
+        project_root / "README.md",
+        project_root / "docs" / "验收清单.md",
+    ]
+
+    violations: list[str] = []
+    for fpath in files_to_check:
+        if not fpath.exists():
+            continue
+        content = fpath.read_text(encoding="utf-8", errors="ignore")
+        for word in competition_words:
+            if word in content:
+                violations.append(f"{fpath.name}: contains '{word}'")
+
+    assert violations == [], "Product copy violations found:\n" + "\n".join(violations)
+    print("✓ test_product_copy_has_no_competition_words passed")
+
+
 if __name__ == "__main__":
     test_init_db_creates_schema()
     test_csv_document_import()
@@ -416,4 +681,12 @@ if __name__ == "__main__":
     test_save_task_metrics()
     test_store_task_lifecycle()
     test_entity_extraction_finds_city_names()
+    test_store_document_detail()
+    test_store_document_export()
+    test_store_document_checkout()
+    test_store_document_checkout_no_remove()
+    test_store_document_delete()
+    test_export_then_delete_does_not_delete_on_export_failure()
+    test_deleted_document_returns_404()
+    test_product_copy_has_no_competition_words()
     print("\n✅ All store service tests passed!")

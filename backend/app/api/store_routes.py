@@ -6,12 +6,16 @@ import uuid
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, UploadFile, File
+from pydantic import BaseModel
 
-from ..core.config import UPLOAD_DIR
+from ..core.config import UPLOAD_DIR, PROJECT_ROOT
 from ..core.logging import logger
 from ..schemas.store_models import StoreImportRequest, StoreTaskStatus
 from ..services.document_store_service import (
+    checkout_document,
     create_store_task,
+    delete_document,
+    export_document_package,
     get_documents,
     get_document_detail,
     get_entities,
@@ -24,6 +28,8 @@ from ..services.document_store_service import (
 )
 
 router = APIRouter(prefix="/api/store")
+
+OUTPUT_DIR = PROJECT_ROOT / "outputs"
 
 # Ensure DB is initialized when this module loads
 try:
@@ -110,11 +116,59 @@ async def list_documents(limit: int = 100, offset: int = 0):
 
 @router.get("/documents/{document_id}")
 async def get_document(document_id: str):
-    """Get detailed metadata for a specific document."""
+    """Get detailed metadata and preview data for a specific document."""
     detail = get_document_detail(document_id)
     if detail is None:
         raise HTTPException(404, f"Document not found: {document_id}")
-    return detail
+    return {"status": "ok", **detail}
+
+
+class CheckoutRequest(BaseModel):
+    remove_after_export: bool = True
+
+
+@router.post("/documents/{document_id}/export")
+async def export_document(document_id: str):
+    """Export a document to a JSON package without removing it from the store."""
+    try:
+        result = export_document_package(document_id, OUTPUT_DIR)
+    except ValueError as exc:
+        raise HTTPException(404, str(exc))
+    except Exception as exc:
+        logger.error(f"Export failed for {document_id}: {exc}", exc_info=True)
+        raise HTTPException(500, f"Export failed: {exc}")
+    return result
+
+
+@router.post("/documents/{document_id}/checkout")
+async def checkout_document_route(document_id: str, request: CheckoutRequest):
+    """Export a document and optionally remove it from the store."""
+    try:
+        result = checkout_document(
+            document_id, OUTPUT_DIR, remove_after_export=request.remove_after_export
+        )
+    except ValueError as exc:
+        raise HTTPException(404, str(exc))
+    except Exception as exc:
+        logger.error(f"Checkout failed for {document_id}: {exc}", exc_info=True)
+        raise HTTPException(500, f"Checkout failed: {exc}")
+    return result
+
+
+@router.delete("/documents/{document_id}")
+async def delete_document_route(document_id: str):
+    """Delete a document and all its associated data from the store.
+
+    Does NOT delete the original upload file from disk.
+    """
+    try:
+        result = delete_document(document_id)
+    except ValueError as exc:
+        raise HTTPException(404, str(exc))
+    except Exception as exc:
+        logger.error(f"Delete failed for {document_id}: {exc}", exc_info=True)
+        raise HTTPException(500, f"Delete failed: {exc}")
+    return result
 
 
 @router.get("/search")
