@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DocFusion - 文档理解与多源数据融合系统</title>
+    <title>DocFusion - 多源数据整合与质量识别应用系统</title>
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <header class="header">
         <div class="header-content">
             <h1>📄 DocFusion</h1>
-            <p class="subtitle">基于大语言模型的文档理解与多源数据融合系统</p>
+            <p class="subtitle">多源数据整合与质量识别应用系统 | 基于大语言模型的文档智能处理平台</p>
             <div id="model-status" class="model-status">
                 <span class="status-dot offline"></span>
                 <span id="model-info">检查模型状态...</span>
@@ -19,9 +19,10 @@
     </header>
 
     <main class="container">
-        <!-- Upload Section -->
+
+        <!-- ① 文档上传 & 主填表流程 -->
         <section class="card">
-            <h2>📁 文档上传</h2>
+            <h2>📁 文档上传与主填表流程</h2>
             <div class="upload-grid">
                 <div class="upload-zone" id="source-zone">
                     <div class="upload-area" id="source-drop">
@@ -42,31 +43,213 @@
                     <div id="template-list" class="file-list"></div>
                 </div>
             </div>
+
+            <!-- Template preview button -->
+            <div style="margin-top:0.5rem">
+                <button class="btn btn-secondary" onclick="inspectUploadedTemplate()" style="font-size:0.85rem;padding:0.4rem 0.9rem">
+                    🔍 预览模板字段
+                </button>
+                <span id="template-schema-hint" style="margin-left:0.75rem;font-size:0.82rem;color:var(--text-secondary)"></span>
+            </div>
+            <div id="template-schema-panel" style="display:none;margin-top:0.75rem"></div>
         </section>
 
-        <!-- Requirement Section -->
+        <!-- ② 多源数据接入 -->
         <section class="card">
-            <h2>📝 用户要求</h2>
+            <h2>🌐 多源数据接入 <span style="font-size:0.8rem;font-weight:normal;color:var(--text-secondary)">（至少两个数据来源，满足赛题要求）</span></h2>
+
+            <div id="external-sources-list" style="margin-bottom:0.75rem"></div>
+
+            <div class="source-add-form" id="source-add-form">
+                <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:flex-end">
+                    <div>
+                        <label class="form-label">来源类型</label>
+                        <select id="new-source-type" onchange="onSourceTypeChange()" class="form-select">
+                            <option value="http_api">HTTP/API 接口</option>
+                            <option value="web_page">网页抓取</option>
+                            <option value="database">SQLite 数据库</option>
+                        </select>
+                    </div>
+                    <div style="flex:1;min-width:160px">
+                        <label class="form-label">来源名称</label>
+                        <input type="text" id="new-source-name" placeholder="自定义名称" class="form-input">
+                    </div>
+                    <div style="flex:2;min-width:200px" id="source-url-field">
+                        <label class="form-label">URL / 地址</label>
+                        <input type="text" id="new-source-url" placeholder="https://..." class="form-input">
+                    </div>
+                    <div style="flex:2;min-width:200px;display:none" id="source-db-field">
+                        <label class="form-label">数据库路径（服务端本地路径）</label>
+                        <input type="text" id="new-source-db-path" placeholder="/path/to/database.sqlite" class="form-input">
+                    </div>
+                    <div style="flex:2;min-width:200px;display:none" id="source-query-field">
+                        <label class="form-label">SQL 查询</label>
+                        <input type="text" id="new-source-query" placeholder="SELECT * FROM table LIMIT 100" class="form-input">
+                    </div>
+                </div>
+                <div style="display:flex;gap:0.5rem;margin-top:0.6rem">
+                    <button class="btn btn-secondary" style="font-size:0.85rem;padding:0.4rem 0.9rem" onclick="previewExternalSource()">
+                        👁 预览数据源
+                    </button>
+                    <button class="btn btn-secondary" style="font-size:0.85rem;padding:0.4rem 0.9rem" onclick="addExternalSource()">
+                        ➕ 加入处理
+                    </button>
+                </div>
+                <div id="source-preview-result" style="display:none;margin-top:0.75rem;border:1px solid var(--border);border-radius:8px;padding:0.75rem;background:#f8fafc;font-size:0.82rem"></div>
+            </div>
+
+            <div id="source-contribution-panel" style="display:none;margin-top:0.75rem">
+                <div style="font-weight:600;font-size:0.88rem;margin-bottom:0.5rem">数据源贡献分析</div>
+                <div id="source-contribution-content"></div>
+            </div>
+        </section>
+
+        <!-- ③ 用户要求与竞赛模式选项 -->
+        <section class="card">
+            <h2>📝 用户要求与处理选项</h2>
             <div id="auto-req-hint" style="display:none;background:#eff6ff;border:1px solid #93c5fd;border-radius:6px;padding:0.4rem 0.75rem;margin-bottom:0.5rem;font-size:0.82rem;color:#1d4ed8"></div>
-            <textarea id="requirement" rows="4" placeholder="请输入您的数据填表要求（可留空，系统将自动识别）...&#10;&#10;示例：将数据中日期从2020/7/1到2020/8/31的数据填入模板中"></textarea>
-            <div class="options-row">
+            <textarea id="requirement" rows="3" placeholder="请输入您的数据填表要求（可留空，系统将自动识别）...&#10;&#10;示例：将数据中日期从2020/7/1到2020/8/31的数据填入模板中"></textarea>
+
+            <!-- Field aliases -->
+            <div style="margin-top:0.5rem">
+                <label class="form-label" style="font-size:0.82rem">字段别名配置（可选，格式：目标字段: [别名1, 别名2]）</label>
+                <textarea id="field-aliases" rows="2" placeholder='{"GDP总量（亿元）": ["地区生产总值", "GDP"], "城市名": ["城市", "地区"]}'
+                    style="font-size:0.82rem;font-family:monospace"></textarea>
+            </div>
+
+            <div class="options-row" style="flex-wrap:wrap;gap:0.75rem 1.25rem">
                 <label class="toggle">
                     <input type="checkbox" id="use-llm" checked>
                     <span class="toggle-slider"></span>
-                    LLM 增强模式
+                    LLM 增强
                 </label>
                 <label class="toggle">
                     <input type="checkbox" id="strict-mode">
                     <span class="toggle-slider"></span>
                     严格匹配
                 </label>
+                <label class="toggle">
+                    <input type="checkbox" id="enable-quality-detection" checked>
+                    <span class="toggle-slider"></span>
+                    质量检测
+                </label>
+                <label class="toggle">
+                    <input type="checkbox" id="enable-data-fusion" checked>
+                    <span class="toggle-slider"></span>
+                    多源融合
+                </label>
+                <label class="toggle">
+                    <input type="checkbox" id="store-extracted-data">
+                    <span class="toggle-slider"></span>
+                    入库存储
+                </label>
+                <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.88rem">
+                    <label for="time-budget">时间预算：</label>
+                    <input type="number" id="time-budget" value="90" min="10" max="600" style="width:60px;border:1px solid var(--border);border-radius:5px;padding:0.25rem 0.4rem;font-size:0.85rem">
+                    <span style="color:var(--text-secondary);font-size:0.82rem">秒/模板</span>
+                </div>
                 <button class="btn btn-primary" id="process-btn" onclick="startProcess()">
                     🚀 开始处理
                 </button>
             </div>
         </section>
 
-        <!-- Processing Steps -->
+        <!-- ④ 文档智能操作 -->
+        <section class="card">
+            <h2>🤖 文档智能操作 <span style="font-size:0.8rem;font-weight:normal;color:var(--text-secondary)">（自然语言文档编辑、提取、替换、格式化）</span></h2>
+
+            <div class="upload-grid" style="grid-template-columns:1fr 1fr;margin-bottom:0.75rem">
+                <div>
+                    <div class="upload-area" id="op-file-drop" style="padding:1.25rem">
+                        <div class="upload-icon" style="font-size:1.8rem">📂</div>
+                        <p style="font-size:0.9rem">拖拽或点击上传<strong>待操作文档</strong></p>
+                        <p class="hint">Excel, Word, TXT, CSV, Markdown</p>
+                        <input type="file" id="op-file-input" accept=".xlsx,.xls,.docx,.md,.txt,.csv,.json" hidden>
+                    </div>
+                    <div id="op-file-info" style="margin-top:0.4rem;font-size:0.82rem;color:var(--text-secondary)"></div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:0.5rem">
+                    <label class="form-label">操作类型（可自动识别）</label>
+                    <select id="op-type" class="form-select">
+                        <option value="">自动识别</option>
+                        <option value="summarize">摘要（summarize）</option>
+                        <option value="extract">字段提取（extract）</option>
+                        <option value="find">查找（find）</option>
+                        <option value="replace">替换（replace）</option>
+                        <option value="export_table">导出表格（export_table）</option>
+                        <option value="format">格式化（format）</option>
+                        <option value="inspect">文档概览（inspect）</option>
+                    </select>
+                    <label class="form-label" style="margin-top:0.25rem">自然语言指令</label>
+                    <textarea id="op-instruction" rows="3" placeholder="例如：&#10;总结这份文档的核心内容&#10;提取文档中的城市、GDP、人口字段&#10;把 {{公司名称}} 替换为 北京示例科技有限公司&#10;查找所有包含「异常」的段落"></textarea>
+                </div>
+            </div>
+
+            <div id="op-extra-fields" style="display:none;margin-bottom:0.75rem">
+                <div id="op-fields-row" style="display:none;margin-bottom:0.5rem">
+                    <label class="form-label">提取字段列表（逗号分隔）</label>
+                    <input type="text" id="op-fields-input" class="form-input" placeholder="城市, GDP总量, 人口, 日期">
+                </div>
+                <div id="op-replacements-row" style="display:none;margin-bottom:0.5rem">
+                    <label class="form-label">替换键值对（JSON 格式）</label>
+                    <input type="text" id="op-replacements-input" class="form-input" placeholder='{"公司名称": "北京示例科技有限公司", "日期": "2025年"}'>
+                </div>
+            </div>
+
+            <div style="display:flex;gap:0.75rem;align-items:center">
+                <button class="btn btn-primary" id="op-btn" onclick="startDocumentOperation()" style="margin-left:0">
+                    ▶ 执行操作
+                </button>
+                <label class="toggle" style="font-size:0.85rem">
+                    <input type="checkbox" id="op-use-llm" checked>
+                    <span class="toggle-slider"></span>
+                    LLM 辅助
+                </label>
+                <span id="op-status-text" style="font-size:0.82rem;color:var(--text-secondary)"></span>
+            </div>
+
+            <div id="op-result-panel" style="display:none;margin-top:1rem"></div>
+        </section>
+
+        <!-- ⑤ 非结构化文档入库 -->
+        <section class="card">
+            <h2>🗄️ 非结构化文档数据库存储 <span style="font-size:0.8rem;font-weight:normal;color:var(--text-secondary)">（提取信息并入 SQLite 资产库）</span></h2>
+
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;margin-bottom:0.75rem">
+                <div class="upload-area" id="store-file-drop" style="padding:0.75rem 1.25rem;flex:1;min-width:200px;display:flex;align-items:center;gap:0.75rem;justify-content:center">
+                    <span>📁</span>
+                    <span style="font-size:0.88rem">拖拽或点击上传文档入库</span>
+                    <input type="file" id="store-file-input" multiple accept=".xlsx,.xls,.docx,.md,.txt,.csv,.json" hidden>
+                </div>
+                <label class="toggle" style="font-size:0.85rem">
+                    <input type="checkbox" id="store-extract-entities" checked>
+                    <span class="toggle-slider"></span>
+                    实体提取
+                </label>
+                <label class="toggle" style="font-size:0.85rem">
+                    <input type="checkbox" id="store-overwrite">
+                    <span class="toggle-slider"></span>
+                    覆盖重复
+                </label>
+                <button class="btn btn-secondary" onclick="startStoreImport()" style="font-size:0.85rem;padding:0.4rem 0.9rem">
+                    📥 执行入库
+                </button>
+                <button class="btn btn-secondary" onclick="loadStoreDocs()" style="font-size:0.85rem;padding:0.4rem 0.9rem">
+                    📋 查看已入库
+                </button>
+            </div>
+
+            <div id="store-task-status" style="display:none;margin-bottom:0.5rem;font-size:0.85rem;padding:0.5rem 0.75rem;border-radius:6px;border:1px solid var(--border);background:#f8fafc"></div>
+
+            <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem">
+                <input type="text" id="store-search-input" class="form-input" placeholder="搜索文档、字段、实体..." style="flex:1">
+                <button class="btn btn-secondary" onclick="searchStore()" style="font-size:0.85rem;padding:0.4rem 0.9rem">🔍 搜索</button>
+            </div>
+
+            <div id="store-content-panel" style="display:none"></div>
+        </section>
+
+        <!-- ⑥ 处理流程 -->
         <section class="card" id="steps-section" style="display:none">
             <h2>⚙️ 处理流程</h2>
             <div class="task-summary">
@@ -87,73 +270,73 @@
                 <div class="task-progress-shell">
                     <div class="task-progress-bar" id="task-progress-bar"></div>
                 </div>
+                <div id="time-budget-warning" style="display:none;padding:0.4rem 0.75rem;background:#fff7ed;border:1px solid #fcd34d;border-radius:6px;font-size:0.82rem;color:#92400e;margin-bottom:0.6rem">
+                    ⏱ 注意：当前时间预算较紧，如超时将自动降级为规则路径
+                </div>
                 <div id="task-model-usage" class="model-usage-box"></div>
                 <div class="template-status-list" id="template-status-list"></div>
             </div>
             <div class="steps" id="steps-container">
-                <div class="step" data-step="cleanup">
-                    <span class="step-icon">🧹</span>
-                    <span class="step-label">环境清理</span>
-                    <span class="step-status">等待</span>
-                </div>
-                <div class="step" data-step="parse">
-                    <span class="step-icon">📖</span>
-                    <span class="step-label">文档解析</span>
-                    <span class="step-status">等待</span>
-                </div>
-                <div class="step" data-step="template">
-                    <span class="step-icon">📋</span>
-                    <span class="step-label">模板解析</span>
-                    <span class="step-status">等待</span>
-                </div>
-                <div class="step" data-step="requirement">
-                    <span class="step-icon">📝</span>
-                    <span class="step-label">需求解析</span>
-                    <span class="step-status">等待</span>
-                </div>
-                <div class="step" data-step="retrieve">
-                    <span class="step-icon">🔍</span>
-                    <span class="step-label">证据检索</span>
-                    <span class="step-status">等待</span>
-                </div>
-                <div class="step" data-step="extract">
-                    <span class="step-icon">⛏️</span>
-                    <span class="step-label">数据抽取</span>
-                    <span class="step-status">等待</span>
-                </div>
-                <div class="step" data-step="fill">
-                    <span class="step-icon">✏️</span>
-                    <span class="step-label">模板填充</span>
-                    <span class="step-status">等待</span>
-                </div>
-                <div class="step" data-step="validate">
-                    <span class="step-icon">✅</span>
-                    <span class="step-label">结果验证</span>
-                    <span class="step-status">等待</span>
-                </div>
-                <div class="step" data-step="output">
-                    <span class="step-icon">📦</span>
-                    <span class="step-label">输出生成</span>
-                    <span class="step-status">等待</span>
+                <div class="step" data-step="cleanup"><span class="step-icon">🧹</span><span class="step-label">环境清理</span><span class="step-status">等待</span></div>
+                <div class="step" data-step="parse"><span class="step-icon">📖</span><span class="step-label">文档解析</span><span class="step-status">等待</span></div>
+                <div class="step" data-step="template"><span class="step-icon">📋</span><span class="step-label">模板解析</span><span class="step-status">等待</span></div>
+                <div class="step" data-step="requirement"><span class="step-icon">📝</span><span class="step-label">需求解析</span><span class="step-status">等待</span></div>
+                <div class="step" data-step="retrieve"><span class="step-icon">🔍</span><span class="step-label">证据检索</span><span class="step-status">等待</span></div>
+                <div class="step" data-step="extract"><span class="step-icon">⛏️</span><span class="step-label">数据抽取</span><span class="step-status">等待</span></div>
+                <div class="step" data-step="fill"><span class="step-icon">✏️</span><span class="step-label">模板填充</span><span class="step-status">等待</span></div>
+                <div class="step" data-step="validate"><span class="step-icon">✅</span><span class="step-label">结果验证</span><span class="step-status">等待</span></div>
+                <div class="step" data-step="output"><span class="step-icon">📦</span><span class="step-label">输出生成</span><span class="step-status">等待</span></div>
+            </div>
+        </section>
+
+        <!-- ⑦ 处理结果 -->
+        <section class="card" id="results-section" style="display:none">
+            <h2>📊 处理结果</h2>
+            <div id="results-container"></div>
+
+            <!-- Competition mode summary -->
+            <div id="competition-panel" style="display:none;margin-top:1rem;border:1px solid var(--border);border-radius:8px;padding:1rem;background:#f8fafc">
+                <div style="font-size:1rem;font-weight:700;margin-bottom:0.75rem">🏆 竞赛模式汇总</div>
+                <div id="competition-summary"></div>
+                <div style="margin-top:0.75rem">
+                    <div style="font-size:0.85rem;font-weight:600;margin-bottom:0.5rem">与标准答案对比（可选）</div>
+                    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:flex-end">
+                        <div>
+                            <label class="form-label">输出文件路径</label>
+                            <input type="text" id="gold-output-file" class="form-input" placeholder="outputs/xxx.xlsx" style="width:200px">
+                        </div>
+                        <div>
+                            <label class="form-label">标准答案文件路径</label>
+                            <input type="text" id="gold-gold-file" class="form-input" placeholder="path/to/gold.xlsx" style="width:200px">
+                        </div>
+                        <button class="btn btn-secondary" onclick="compareWithGold()" style="font-size:0.85rem;padding:0.4rem 0.9rem">📊 对比准确率</button>
+                    </div>
+                    <div id="gold-compare-result" style="margin-top:0.5rem"></div>
                 </div>
             </div>
         </section>
 
-        <!-- Results Section -->
-        <section class="card" id="results-section" style="display:none">
-            <h2>📊 处理结果</h2>
-            <div id="results-container"></div>
+        <!-- ⑧ 数据质量与分析看板 -->
+        <section class="card" id="analytics-section">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+                <h2 style="margin-bottom:0">📈 数据质量与分析看板</h2>
+                <button class="btn btn-secondary" onclick="loadAnalyticsDashboard()" style="font-size:0.85rem;padding:0.4rem 0.9rem">🔄 刷新看板</button>
+            </div>
+            <div id="analytics-panel">
+                <div style="color:var(--text-secondary);font-size:0.85rem">点击「刷新看板」加载最新数据质量统计</div>
+            </div>
         </section>
 
-        <!-- Logs Section -->
+        <!-- ⑨ 日志 -->
         <section class="card" id="logs-section" style="display:none">
             <h2>📜 处理日志</h2>
             <div class="log-container" id="log-container"></div>
         </section>
+
     </main>
 
     <footer class="footer">
-        <p>DocFusion v1.0 | 基于 Ollama + qwen2.5:14b 本地部署</p>
+        <p>DocFusion v2.0 | 多源数据整合与质量识别应用系统 | Ollama + qwen2.5:14b 本地部署</p>
     </footer>
 
     <script src="/static/app.js"></script>

@@ -6,13 +6,17 @@ from fastapi.responses import FileResponse
 from pathlib import Path
 
 from .api.routes import router
+from .api.store_routes import router as store_router
+from .api.analytics_routes import router as analytics_router
+from .api.evaluation_routes import router as evaluation_router
+from .api.template_routes import router as template_router
 from .core.logging import logger
 from .core.config import PROJECT_ROOT
 
 app = FastAPI(
     title="DocFusion - 文档理解与多源数据融合系统",
     description="基于大语言模型的文档理解与多源数据融合系统",
-    version="1.0.0",
+    version="2.0.0",
 )
 
 # CORS
@@ -26,6 +30,10 @@ app.add_middleware(
 
 # API routes
 app.include_router(router)
+app.include_router(store_router)
+app.include_router(analytics_router)
+app.include_router(evaluation_router)
+app.include_router(template_router)
 
 # Serve frontend static files
 frontend_dir = PROJECT_ROOT / "frontend"

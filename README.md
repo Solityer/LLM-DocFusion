@@ -364,10 +364,58 @@ project/
     - 当前服务已正常运行，可通过浏览器访问 `http://localhost:8000/` 与 `/docs`。
     - 如需将该日志写入版本控制（git commit），可由我代为提交并创建变更说明。
 
+## v2.0 新增功能（2026-04-24）
+
+DocFusion v2.0 在原有填表引擎基础上新增以下模块：
+
+### Module A — SQLite 文档资产库
+
+所有处理过的文档（含实体、字段、质量问题）可入库至 `data/docfusion_store.sqlite`，支持 SHA256 去重和全文搜索。
+
+新增 API：
+
+| 端点 | 说明 |
+|------|------|
+| `POST /api/store/import/upload` | 上传文档并入库 |
+| `GET /api/store/documents` | 文档列表 |
+| `GET /api/store/search?q=` | 全文检索 |
+| `GET /api/store/stats` | 数据库统计 |
+
+### Module B — 文档智能操作前端
+
+在"🤖 文档智能操作"面板中上传文档，使用自然语言指令执行摘要/提取/查找/替换/格式化操作。
+
+### Module C — 多源数据接入前端
+
+在"🌐 多源数据接入"面板中配置 HTTP/API、网页抓取、SQLite 等外部数据源，支持预览后加入处理。
+
+### Module D — 模板字段增强
+
+- `POST /api/templates/inspect/upload`：上传后预览模板字段
+- `options.field_aliases`：配置字段别名映射
+- `options.time_budget_seconds`：任务时间预算
+- `options.store_extracted_data`：处理后自动入库
+
+### Module E — 数据质量分析看板
+
+`GET /api/analytics/dashboard` 返回全局统计、数据源类型分布、质量问题分布、近期任务列表。
+
+### Module F — 竞赛评估模式
+
+`POST /api/evaluate/compare` 将填写输出文件与标准答案对比，返回单元格准确率和行准确率（≥80% 为合格）。
+
+---
+
 ## 运行测试
 
 ```bash
-cd /home/match/project
-source venv/bin/activate
-cd backend && python -m tests.test_basic
-``
+cd /home/match/LLM-DocFusion/backend
+python3 -m pytest tests/ -v
+```
+
+测试覆盖（74 个测试，全部通过）：
+- `tests/test_basic.py` — 核心逻辑（JSON修复、文档读取、模板解析、抽取、填充、验证等）
+- `tests/test_store_service.py` — SQLite 文档资产库（入库、去重、搜索、质量问题）
+- `tests/test_evaluation_service.py` — 评估服务（CSV/Excel 准确率对比）
+- `tests/test_template_inspect.py` — 模板字段检视（CSV/Excel/TXT/MD）
+- `tests/test_multisource_preview.py` — 多源预览（本地文件、错误处理、规则路径）

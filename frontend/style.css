@@ -508,3 +508,173 @@ textarea:focus { outline: none; border-color: var(--primary); }
 .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
 .tab-content { display: none; }
 .tab-content.active { display: block; }
+
+/* Form elements (new sections) */
+.form-label {
+    display: block;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+.form-input {
+    width: 100%;
+    padding: 0.45rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.88rem;
+    font-family: inherit;
+    background: white;
+    transition: border-color 0.2s;
+}
+
+.form-input:focus { outline: none; border-color: var(--primary); }
+
+.form-select {
+    padding: 0.45rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.88rem;
+    font-family: inherit;
+    background: white;
+    cursor: pointer;
+}
+
+/* External sources list */
+.ext-source-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.75rem;
+    background: #f1f5f9;
+    border-radius: 6px;
+    margin-bottom: 0.35rem;
+    font-size: 0.85rem;
+}
+
+.ext-source-type {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1rem 0.45rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.ext-source-type.web { background: #d1fae5; color: #065f46; }
+.ext-source-type.db { background: #fef9c3; color: #713f12; }
+
+/* Source add form */
+.source-add-form {
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #f8fafc;
+}
+
+/* Analytics dashboard */
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.analytics-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    text-align: center;
+}
+
+.analytics-card .stat-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.analytics-card .stat-label {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-top: 0.2rem;
+}
+
+.bar-chart-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.3rem;
+    font-size: 0.82rem;
+}
+
+.bar-chart-label { min-width: 120px; color: var(--text-secondary); }
+.bar-chart-bar {
+    flex: 1;
+    height: 18px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+.bar-chart-fill { height: 100%; background: var(--primary); border-radius: 3px; transition: width 0.4s; }
+.bar-chart-value { min-width: 36px; text-align: right; }
+
+/* Competition mode */
+.competition-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 0.4rem;
+    font-size: 0.85rem;
+    background: white;
+}
+
+.competition-pass { color: var(--success); font-weight: 600; }
+.competition-fail { color: var(--danger); font-weight: 600; }
+
+/* Store search results */
+.store-result-item {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+}
+.store-result-item:last-child { border-bottom: none; }
+.store-result-type {
+    display: inline-flex;
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    background: #e0f2fe;
+    color: #0369a1;
+    margin-right: 0.4rem;
+}
+
+/* Operation result */
+.op-result-block {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-size: 0.85rem;
+}
+
+.op-key-point {
+    padding: 0.3rem 0;
+    border-bottom: 1px solid #e5e7eb;
+    display: flex;
+    gap: 0.4rem;
+}
+.op-key-point:last-child { border-bottom: none; }
+
+/* Responsive additions */
+@media (max-width: 768px) {
+    .analytics-grid { grid-template-columns: repeat(2, 1fr); }
+    .source-add-form > div:first-child { flex-direction: column; }
+}

@@ -86,3 +86,218 @@
 [2026-04-24 12:36:21] INFO docfusion: Validating result for: /tmp/tmpofy5rgv_/sales-template.csv
 [2026-04-24 12:36:21] INFO docfusion:   -> Validation: 30/30 checks passed
 [2026-04-24 12:36:21] INFO docfusion: Cleaning runtime artifacts after processing
+[2026-04-24 14:43:08] INFO docfusion: DocFusion store initialized at /tmp/tmp9j5pmk7u/data/test_store.sqlite
+[2026-04-24 14:43:09] INFO docfusion: DocFusion store initialized at /tmp/tmpzvtizmf3/data/test_store.sqlite
+[2026-04-24 14:43:09] INFO docfusion: Reading document: city_gdp.csv (type=csv, role=source)
+[2026-04-24 14:43:09] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:09] INFO docfusion: DocFusion store initialized at /tmp/tmprgh8sa_o/data/test_store.sqlite
+[2026-04-24 14:43:09] INFO docfusion: Reading document: report.txt (type=text, role=source)
+[2026-04-24 14:43:09] INFO docfusion:   -> 2 text blocks, 0 tables
+[2026-04-24 14:43:09] INFO docfusion: DocFusion store initialized at /tmp/tmp_86uaq1r/data/test_store.sqlite
+[2026-04-24 14:43:09] INFO docfusion: Reading document: dup.csv (type=csv, role=source)
+[2026-04-24 14:43:09] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:09] INFO docfusion: DocFusion store initialized at /tmp/tmpibk8ms0v/data/test_store.sqlite
+[2026-04-24 14:43:09] INFO docfusion: Reading document: overwrite_test.csv (type=csv, role=source)
+[2026-04-24 14:43:09] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:09] INFO docfusion: DocFusion store initialized at /tmp/tmphm88255o/data/test_store.sqlite
+[2026-04-24 14:43:09] INFO docfusion: Reading document: city_data.csv (type=csv, role=source)
+[2026-04-24 14:43:09] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:09] INFO docfusion: DocFusion store initialized at /tmp/tmp0_r4j3ta/data/test_store.sqlite
+[2026-04-24 14:43:09] INFO docfusion: Reading document: air_quality.txt (type=text, role=source)
+[2026-04-24 14:43:09] INFO docfusion:   -> 1 text blocks, 0 tables
+[2026-04-24 14:43:09] INFO docfusion: DocFusion store initialized at /tmp/tmpsobnt422/data/test_store.sqlite
+[2026-04-24 14:43:09] INFO docfusion: Reading document: quality_test.csv (type=csv, role=source)
+[2026-04-24 14:43:09] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:09] INFO docfusion: DocFusion store initialized at /tmp/tmpflo3qku9/data/test_store.sqlite
+[2026-04-24 14:43:09] INFO docfusion: Reading document: a.csv (type=csv, role=source)
+[2026-04-24 14:43:09] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:09] INFO docfusion: Reading document: b.csv (type=csv, role=source)
+[2026-04-24 14:43:09] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:09] INFO docfusion: DocFusion store initialized at /tmp/tmp64gdj35h/data/test_store.sqlite
+[2026-04-24 14:43:09] INFO docfusion: Reading document: s1.csv (type=csv, role=source)
+[2026-04-24 14:43:09] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:09] INFO docfusion: Reading document: s2.txt (type=text, role=source)
+[2026-04-24 14:43:09] INFO docfusion:   -> 1 text blocks, 0 tables
+[2026-04-24 14:43:09] INFO docfusion: DocFusion store initialized at /tmp/tmpdre8hcgw/data/test_store.sqlite
+[2026-04-24 14:43:09] INFO docfusion: DocFusion store initialized at /tmp/tmp1a6xbplh/data/test_store.sqlite
+[2026-04-24 14:43:09] INFO docfusion: Reading document: cities.txt (type=text, role=source)
+[2026-04-24 14:43:09] INFO docfusion:   -> 1 text blocks, 0 tables
+[2026-04-24 14:43:10] WARNING docfusion: evaluate: file not found: /nonexistent/path/output.csv
+[2026-04-24 14:43:10] INFO docfusion: Parsing template: template.csv (type=csv)
+[2026-04-24 14:43:10] INFO docfusion:   -> 1 tables, 3 fields, 0 placeholders, type=tabular
+[2026-04-24 14:43:10] INFO docfusion: Parsing template: template.txt (type=text)
+[2026-04-24 14:43:10] INFO docfusion:   -> 0 tables, 6 fields, 6 placeholders, type=text
+[2026-04-24 14:43:10] INFO docfusion: Parsing template: template.md (type=markdown)
+[2026-04-24 14:43:10] INFO docfusion:   -> 1 tables, 3 fields, 0 placeholders, type=mixed
+[2026-04-24 14:43:10] INFO docfusion: Parsing template: template.xlsx (type=excel)
+[2026-04-24 14:43:10] INFO docfusion:   -> 1 tables, 4 fields, 0 placeholders, type=tabular
+[2026-04-24 14:43:10] INFO docfusion: Parsing template: t.csv (type=csv)
+[2026-04-24 14:43:10] INFO docfusion:   -> 1 tables, 3 fields, 0 placeholders, type=tabular
+[2026-04-24 14:43:10] INFO docfusion: Parsing template: multi_placeholder.txt (type=text)
+[2026-04-24 14:43:10] INFO docfusion:   -> 0 tables, 8 fields, 8 placeholders, type=text
+[2026-04-24 14:43:10] INFO docfusion: Parsing template: wide.csv (type=csv)
+[2026-04-24 14:43:10] INFO docfusion:   -> 1 tables, 5 fields, 0 placeholders, type=tabular
+[2026-04-24 14:43:10] INFO docfusion: Parsing requirement: 将数据填入模板
+[2026-04-24 14:43:10] INFO docfusion:   -> time_range=None, entities=[], indicators=[], filters={}, granularity=按模板字段填充
+[2026-04-24 14:43:10] INFO docfusion: Reading document: city.csv (type=csv, role=source)
+[2026-04-24 14:43:10] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:10] INFO docfusion: Reading document: report.txt (type=text, role=source)
+[2026-04-24 14:43:10] INFO docfusion:   -> 2 text blocks, 0 tables
+[2026-04-24 14:43:10] INFO docfusion: Reading document: a.csv (type=csv, role=source)
+[2026-04-24 14:43:10] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:10] INFO docfusion: Reading document: b.csv (type=csv, role=source)
+[2026-04-24 14:43:10] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:10] INFO docfusion: Reading document: good.csv (type=csv, role=source)
+[2026-04-24 14:43:10] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:10] INFO docfusion: Reading document: big.csv (type=csv, role=source)
+[2026-04-24 14:43:10] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:10] INFO docfusion: Reading document: data.csv (type=csv, role=source)
+[2026-04-24 14:43:10] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:10] INFO docfusion: Reading document: source.csv (type=csv, role=source)
+[2026-04-24 14:43:10] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:10] INFO docfusion: Parsing template: template.csv (type=csv)
+[2026-04-24 14:43:10] INFO docfusion:   -> 1 tables, 3 fields, 0 placeholders, type=tabular
+[2026-04-24 14:43:27] INFO docfusion: DocFusion store initialized at /tmp/tmpagyffyi8/data/test_store.sqlite
+[2026-04-24 14:43:27] INFO docfusion: DocFusion store initialized at /tmp/tmpza_bidfq/data/test_store.sqlite
+[2026-04-24 14:43:27] INFO docfusion: Reading document: city_gdp.csv (type=csv, role=source)
+[2026-04-24 14:43:27] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:27] INFO docfusion: DocFusion store initialized at /tmp/tmpns71t_gt/data/test_store.sqlite
+[2026-04-24 14:43:27] INFO docfusion: Reading document: report.txt (type=text, role=source)
+[2026-04-24 14:43:27] INFO docfusion:   -> 2 text blocks, 0 tables
+[2026-04-24 14:43:27] INFO docfusion: DocFusion store initialized at /tmp/tmp1f91vvjm/data/test_store.sqlite
+[2026-04-24 14:43:27] INFO docfusion: Reading document: dup.csv (type=csv, role=source)
+[2026-04-24 14:43:27] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:27] INFO docfusion: DocFusion store initialized at /tmp/tmp1n1fowzc/data/test_store.sqlite
+[2026-04-24 14:43:27] INFO docfusion: Reading document: overwrite_test.csv (type=csv, role=source)
+[2026-04-24 14:43:27] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:28] INFO docfusion: DocFusion store initialized at /tmp/tmpymftx1mq/data/test_store.sqlite
+[2026-04-24 14:43:28] INFO docfusion: Reading document: city_data.csv (type=csv, role=source)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:28] INFO docfusion: DocFusion store initialized at /tmp/tmp0sbywdf_/data/test_store.sqlite
+[2026-04-24 14:43:28] INFO docfusion: Reading document: air_quality.txt (type=text, role=source)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 text blocks, 0 tables
+[2026-04-24 14:43:28] INFO docfusion: DocFusion store initialized at /tmp/tmpzai4f59b/data/test_store.sqlite
+[2026-04-24 14:43:28] INFO docfusion: Reading document: quality_test.csv (type=csv, role=source)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:28] INFO docfusion: DocFusion store initialized at /tmp/tmp2u35rruf/data/test_store.sqlite
+[2026-04-24 14:43:28] INFO docfusion: Reading document: a.csv (type=csv, role=source)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:28] INFO docfusion: Reading document: b.csv (type=csv, role=source)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:28] INFO docfusion: DocFusion store initialized at /tmp/tmpfdy6w_rr/data/test_store.sqlite
+[2026-04-24 14:43:28] INFO docfusion: Reading document: s1.csv (type=csv, role=source)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:28] INFO docfusion: Reading document: s2.txt (type=text, role=source)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 text blocks, 0 tables
+[2026-04-24 14:43:28] INFO docfusion: DocFusion store initialized at /tmp/tmpicma18as/data/test_store.sqlite
+[2026-04-24 14:43:28] INFO docfusion: DocFusion store initialized at /tmp/tmpiectvr3n/data/test_store.sqlite
+[2026-04-24 14:43:28] INFO docfusion: Reading document: cities.txt (type=text, role=source)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 text blocks, 0 tables
+[2026-04-24 14:43:28] WARNING docfusion: evaluate: file not found: /nonexistent/path/output.csv
+[2026-04-24 14:43:28] INFO docfusion: Parsing template: template.csv (type=csv)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 tables, 3 fields, 0 placeholders, type=tabular
+[2026-04-24 14:43:28] INFO docfusion: Parsing template: template.txt (type=text)
+[2026-04-24 14:43:28] INFO docfusion:   -> 0 tables, 6 fields, 6 placeholders, type=text
+[2026-04-24 14:43:28] INFO docfusion: Parsing template: template.md (type=markdown)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 tables, 3 fields, 0 placeholders, type=mixed
+[2026-04-24 14:43:28] INFO docfusion: Parsing template: template.xlsx (type=excel)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 tables, 4 fields, 0 placeholders, type=tabular
+[2026-04-24 14:43:28] INFO docfusion: Parsing template: t.csv (type=csv)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 tables, 3 fields, 0 placeholders, type=tabular
+[2026-04-24 14:43:28] INFO docfusion: Parsing template: multi_placeholder.txt (type=text)
+[2026-04-24 14:43:28] INFO docfusion:   -> 0 tables, 8 fields, 8 placeholders, type=text
+[2026-04-24 14:43:28] INFO docfusion: Parsing template: wide.csv (type=csv)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 tables, 5 fields, 0 placeholders, type=tabular
+[2026-04-24 14:43:28] INFO docfusion: Parsing requirement: 将数据填入模板
+[2026-04-24 14:43:28] INFO docfusion:   -> time_range=None, entities=[], indicators=[], filters={}, granularity=按模板字段填充
+[2026-04-24 14:43:28] INFO docfusion: Reading document: city.csv (type=csv, role=source)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:28] INFO docfusion: Reading document: report.txt (type=text, role=source)
+[2026-04-24 14:43:28] INFO docfusion:   -> 2 text blocks, 0 tables
+[2026-04-24 14:43:28] INFO docfusion: Reading document: a.csv (type=csv, role=source)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:28] INFO docfusion: Reading document: b.csv (type=csv, role=source)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:28] INFO docfusion: Reading document: good.csv (type=csv, role=source)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:28] INFO docfusion: Reading document: big.csv (type=csv, role=source)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:28] INFO docfusion: Reading document: data.csv (type=csv, role=source)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:28] INFO docfusion: Reading document: source.csv (type=csv, role=source)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:28] INFO docfusion: Parsing template: template.csv (type=csv)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 tables, 3 fields, 0 placeholders, type=tabular
+[2026-04-24 14:43:28] INFO docfusion: Parsing requirement: 将日期从2020/7/1到2020/8/31的数据填入模板中
+[2026-04-24 14:43:28] INFO docfusion:   -> time_range=['2020-07-01', '2020-08-31'], entities=[], indicators=[], filters={}, granularity=按模板字段填充
+[2026-04-24 14:43:28] INFO docfusion: Parsing requirement: 
+    表一：
+        监测时间：2025-11-25 09:00:00.0
+        城市：德州市
+    表二：
+        监测时间：2025-11-25 09:00:00.
+[2026-04-24 14:43:28] INFO docfusion:   -> time_range=['2025-11-01', '2025-11-31'], entities=['2025-11-25 09:00:00.0', '德州市', '潍坊市'], indicators=[], filters={'监测时间': ['2025-11-25 09:00:00.0']}, granularity=逐条记录
+[2026-04-24 14:43:28] INFO docfusion: Parsing requirement: 帮我智能填表
+[2026-04-24 14:43:28] INFO docfusion:   -> time_range=None, entities=[], indicators=[], filters={}, granularity=按模板字段填充
+[2026-04-24 14:43:28] INFO docfusion: Parsing requirement: 根据数据源中的空气质量监测数据，将监测时间为2025-11-25 09:00:00.0的数据填入模板。
+[2026-04-24 14:43:28] INFO docfusion:   -> time_range=['2025-11-01', '2025-11-31'], entities=[], indicators=[], filters={'监测时间': ['2025-11-25 09:00:00.0']}, granularity=按模板字段填充
+[2026-04-24 14:43:28] INFO docfusion: Parsing template: city-template.xlsx (type=excel)
+[2026-04-24 14:43:28] INFO docfusion:   -> 1 tables, 5 fields, 0 placeholders, type=tabular
+[2026-04-24 14:43:28] INFO docfusion: Reading document: city-report.docx (type=word, role=source)
+[2026-04-24 14:43:28] INFO docfusion:   -> 113 text blocks, 0 tables
+[2026-04-24 14:43:28] INFO docfusion: Parsing requirement: 时间范围：未明确，优先采用数据源最新且与模板匹配的时间范围
+实体范围：年中国城市经济百强全景报告、数据重塑与格局新变化
+指标关键词：城市名、GDP总量（亿元）、常住人口（万）、人均GDP（元）、一般公
+[2026-04-24 14:43:28] INFO docfusion:   -> time_range=None, entities=['年中国城市经济百强全景报告', '数据重塑与格局新变化'], indicators=['城市名', 'GDP总量（亿元）', '常住人口（万）', '人均GDP（元）', '一般公共预算收入（亿元）', '关键词：城市名', '来源主题和时间范围综合匹配'], filters={'默认过滤': ['按模板字段', '来源主题和时间范围综合匹配']}, granularity=逐条记录
+[2026-04-24 14:43:28] INFO docfusion: LLM call attempt 1/3, prompt length=667
+[2026-04-24 14:43:46] INFO docfusion: LLM responded in 17.7s, status=200
+[2026-04-24 14:43:46] INFO docfusion: Parsing requirement: 时间范围：未明确，优先采用数据源最新且与模板匹配的时间范围；
+实体范围：中国城市经济百强全景报告、数据重塑与格局新变化；
+指标关键词：城市名、GDP总量（亿元）、常住人口（万）、人均GDP（元）、一般
+[2026-04-24 14:43:46] INFO docfusion:   -> time_range=None, entities=['中国城市经济百强全景报告', '数据重塑与格局新变化'], indicators=['城市名', 'GDP总量（亿元）', '常住人口（万）', '人均GDP（元）', '一般公共预算收入（亿元）', '关键词：城市名', '来源主题和时间范围综合匹配'], filters={'默认过滤': ['按模板字段', '来源主题和时间范围综合匹配；']}, granularity=逐条记录
+[2026-04-24 14:43:46] INFO docfusion: Parsing requirement: 时间范围：未明确
+[2026-04-24 14:43:46] INFO docfusion:   -> time_range=None, entities=[], indicators=[], filters={}, granularity=按模板字段填充
+[2026-04-24 14:43:46] INFO docfusion: Reading document: tmp0b9kod3p.csv (type=csv, role=source)
+[2026-04-24 14:43:46] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-24 14:43:46] INFO docfusion: Reading document: tmpjk3k2i4h.txt (type=text, role=source)
+[2026-04-24 14:43:46] INFO docfusion:   -> 2 text blocks, 0 tables
+[2026-04-24 14:43:46] INFO docfusion: Reading document: tmpt75l1r24.md (type=markdown, role=source)
+[2026-04-24 14:43:46] INFO docfusion:   -> 2 text blocks, 1 tables
+[2026-04-24 14:43:46] INFO docfusion: Parsing template: tmpqgabztl4.csv (type=csv)
+[2026-04-24 14:43:46] INFO docfusion:   -> 1 tables, 3 fields, 0 placeholders, type=tabular
+[2026-04-24 14:43:46] INFO docfusion: Parsing template: tmpbws1a3zt.txt (type=text)
+[2026-04-24 14:43:46] INFO docfusion:   -> 0 tables, 6 fields, 6 placeholders, type=text
+[2026-04-24 14:43:46] INFO docfusion: Reading document: 2025年中国城市经济百强全景报告.docx (type=word, role=source)
+[2026-04-24 14:43:46] INFO docfusion:   -> 113 text blocks, 0 tables
+[2026-04-24 14:43:46] INFO docfusion: Parsing template: 2025年中国城市经济百强全景报告-模板.xlsx (type=excel)
+[2026-04-24 14:43:46] INFO docfusion:   -> 1 tables, 5 fields, 0 placeholders, type=tabular
+[2026-04-24 14:43:46] INFO docfusion: Reading document: tmp3_rl1fca.txt (type=text, role=source)
+[2026-04-24 14:43:46] INFO docfusion:   -> 2 text blocks, 0 tables
+[2026-04-24 14:43:46] INFO docfusion: Validating result for: /home/match/LLM-DocFusion/backend/tests/test_basic.py
+[2026-04-24 14:43:46] INFO docfusion:   -> Validation: 27/30 checks passed
+[2026-04-24 14:43:46] INFO docfusion: Validating result for: /home/match/LLM-DocFusion/backend/tests/test_basic.py
+[2026-04-24 14:43:46] INFO docfusion:   -> Validation: 24/29 checks passed
+[2026-04-24 14:43:46] INFO docfusion: Validating result for: /home/match/LLM-DocFusion/backend/tests/test_basic.py
+[2026-04-24 14:43:46] INFO docfusion:   -> Validation: 24/30 checks passed
+[2026-04-24 14:43:46] INFO docfusion: Validating result for: /home/match/LLM-DocFusion/backend/tests/test_basic.py
+[2026-04-24 14:43:46] INFO docfusion:   -> Validation: 20/30 checks passed
+[2026-04-24 14:43:46] INFO docfusion: Validating result for: /home/match/LLM-DocFusion/backend/tests/test_basic.py
+[2026-04-24 14:43:46] INFO docfusion:   -> Validation: 21/30 checks passed
+[2026-04-24 14:43:46] INFO docfusion: Validating result for: /home/match/LLM-DocFusion/backend/tests/test_basic.py
+[2026-04-24 14:43:46] INFO docfusion:   -> Validation: 16/18 checks passed
+[2026-04-24 14:43:46] INFO docfusion: Validating result for: /home/match/LLM-DocFusion/backend/tests/test_basic.py
+[2026-04-24 14:43:46] INFO docfusion:   -> Validation: 24/29 checks passed
+[2026-04-24 14:43:46] INFO docfusion: Reading document: 2025年中国城市经济百强全景报告.docx (type=word, role=source)
+[2026-04-24 14:43:46] INFO docfusion:   -> 113 text blocks, 0 tables
+[2026-04-24 14:43:46] INFO docfusion: Reading document: 中国COVID-19新冠疫情情况.docx (type=word, role=source)
+[2026-04-24 14:43:46] INFO docfusion:   -> 31 text blocks, 0 tables
+[2026-04-24 14:43:46] INFO docfusion: Parsing template: 2025年中国城市经济百强全景报告-模板.xlsx (type=excel)
+[2026-04-24 14:43:46] INFO docfusion:   -> 1 tables, 5 fields, 0 placeholders, type=tabular
+[2026-04-24 14:43:46] INFO docfusion: Parsing template: COVID-19 模板.xlsx (type=excel)
+[2026-04-24 14:43:46] INFO docfusion:   -> 1 tables, 6 fields, 0 placeholders, type=tabular
+[2026-04-24 14:43:46] INFO docfusion: Parsing template: 2025年中国城市经济百强全景报告-模板.xlsx (type=excel)
+[2026-04-24 14:43:46] INFO docfusion:   -> 1 tables, 5 fields, 0 placeholders, type=tabular
+[2026-04-24 14:43:46] INFO docfusion: Parsing template: COVID-19 模板.xlsx (type=excel)
+[2026-04-24 14:43:46] INFO docfusion:   -> 1 tables, 6 fields, 0 placeholders, type=tabular
+[2026-04-24 14:43:46] INFO docfusion: Filling template: /tmp/tmpcr3sh3t4/template.xlsx (type=excel) -> /tmp/tmpcr3sh3t4/output.xlsx
+[2026-04-24 14:43:46] INFO docfusion:   -> Fill rate: 100.0%, 3 rows
