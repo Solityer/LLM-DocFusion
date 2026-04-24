@@ -37,8 +37,12 @@ def operate_document(request: DocumentOperationRequest) -> DocumentOperationResp
         output_file = replace_placeholders(request)
         result = {"replacements": request.replacements, "output_file": output_file}
     elif intent == "export_table":
-        output_file = export_tables(request, document)
-        result = {"output_file": output_file, "table_count": len(document.tables)}
+        if not document.tables:
+            warnings.append("未检测到表格")
+            result = {"table_count": 0, "message": "未检测到可导出的表格"}
+        else:
+            output_file = export_tables(request, document)
+            result = {"output_file": output_file, "table_count": len(document.tables)}
     elif intent == "format":
         output_file = save_formatted_text(request, document)
         result = {"output_file": output_file}

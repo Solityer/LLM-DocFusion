@@ -41,6 +41,36 @@ from .validation_service import apply_validation_outcome, validate_result
 ProgressCallback = Callable[[dict[str, Any]], None]
 
 
+def _save_task_metrics_safe(response: ProcessResponse) -> None:
+    """Persist task-level metrics to the analytics store (best-effort)."""
+    try:
+        from .document_store_service import save_task_metrics
+        report = response.report_summary or {}
+        fill_rates = [r.fill_rate for r in (response.results or []) if r.fill_rate is not None]
+        avg_fill = sum(fill_rates) / len(fill_rates) if fill_rates else 0.0
+        quality_issues = sum(
+            (r.quality_report or {}).get("summary", {}).get("issue_count", 0)
+            for r in (response.results or [])
+        )
+        duration = max(0.0, (response.finished_at or 0) - (response.started_at or 0))
+        save_task_metrics(
+            task_id=response.task_id,
+            template_count=len(response.template_statuses or []),
+            source_count=len(set(
+                s.source_file
+                for r in (response.results or [])
+                for s in (r.source_stats or [])
+            )),
+            fill_rate=round(avg_fill, 2),
+            field_match_rate=round(avg_fill / 100.0, 4),
+            quality_issue_count=quality_issues,
+            response_time=round(duration, 2),
+            report=report,
+        )
+    except Exception as exc:
+        logger.warning(f"save_task_metrics failed (non-critical): {exc}")
+
+
 def _model_usage_snapshot(
     task_id: str,
     *,
@@ -303,6 +333,10 @@ def process_documents(
         response.fusion_report = source_fusion_report if enable_data_fusion else {}
         response.normalization_report = _build_normalization_report(results)
         response.report_summary = build_task_report(response)
+
+        # Persist metrics to analytics store (best-effort)
+        if response.status == "completed":
+            _save_task_metrics_safe(response)
 
         _emit_progress(
             progress_callback,
