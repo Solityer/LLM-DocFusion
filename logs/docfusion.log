@@ -1,0 +1,30 @@
+[2026-04-26 14:58:46] INFO docfusion: DocFusion store initialized at /home/match/LLM-DocFusion/data/docfusion_store.sqlite
+[2026-04-26 14:58:46] INFO docfusion: DocFusion server starting...
+[2026-04-26 14:58:46] INFO docfusion: Project root: /home/match/LLM-DocFusion
+[2026-04-26 14:58:46] INFO docfusion: Frontend dir: /home/match/LLM-DocFusion/frontend
+[2026-04-26 15:07:50] INFO docfusion: DocFusion store initialized at /home/match/LLM-DocFusion/data/docfusion_store.sqlite
+[2026-04-26 15:07:50] INFO docfusion: DocFusion server starting...
+[2026-04-26 15:07:50] INFO docfusion: Project root: /home/match/LLM-DocFusion
+[2026-04-26 15:07:50] INFO docfusion: Frontend dir: /home/match/LLM-DocFusion/frontend
+[2026-04-26 15:10:16] INFO docfusion: Reading document: city.csv (type=csv, role=source)
+[2026-04-26 15:10:16] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-26 15:10:16] INFO docfusion: Reading document: report.txt (type=text, role=source)
+[2026-04-26 15:10:16] INFO docfusion:   -> 2 text blocks, 0 tables
+[2026-04-26 15:10:16] INFO docfusion: Reading document: a.csv (type=csv, role=source)
+[2026-04-26 15:10:16] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-26 15:10:16] INFO docfusion: Reading document: b.csv (type=csv, role=source)
+[2026-04-26 15:10:16] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-26 15:10:16] INFO docfusion: Reading document: good.csv (type=csv, role=source)
+[2026-04-26 15:10:16] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-26 15:10:16] INFO docfusion: Reading document: big.csv (type=csv, role=source)
+[2026-04-26 15:10:16] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-26 15:10:16] INFO docfusion: Reading document: data.csv (type=csv, role=source)
+[2026-04-26 15:10:16] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-26 15:10:16] INFO docfusion: Reading document: source.csv (type=csv, role=source)
+[2026-04-26 15:10:16] INFO docfusion:   -> 1 text blocks, 1 tables
+[2026-04-26 15:10:16] INFO docfusion: Parsing template: template.csv (type=csv)
+[2026-04-26 15:10:16] INFO docfusion:   -> 1 tables, 3 fields, 0 placeholders, type=tabular
+[2026-04-26 15:11:08] INFO docfusion: DocFusion store initialized at /home/match/LLM-DocFusion/data/docfusion_store.sqlite
+[2026-04-26 15:11:08] INFO docfusion: DocFusion server starting...
+[2026-04-26 15:11:08] INFO docfusion: Project root: /home/match/LLM-DocFusion
+[2026-04-26 15:11:08] INFO docfusion: Frontend dir: /home/match/LLM-DocFusion/frontend

@@ -239,6 +239,137 @@ def test_existing_fill_api_compatibility():
     print("✓ test_existing_fill_api_compatibility passed")
 
 
+# ── Web page source tests (no public network required) ─────────────────────────
+
+def test_web_page_preview_ignores_env_socks_proxy_by_default(monkeypatch):
+    """fetch_web_source should default trust_env=False and never fail due to a
+    SOCKS env-proxy when socksio is absent."""
+    import http.server
+    import threading
+
+    from app.schemas.source_models import SourceSpec, SourceType
+
+    # Minimal HTML served locally.
+    HTML = b"<html><body><h1>Hello Test</h1><p>Paragraph text.</p></body></html>"
+
+    class _Handler(http.server.BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(HTML)))
+            self.end_headers()
+            self.wfile.write(HTML)
+
+        def log_message(self, *args):
+            pass  # suppress output
+
+    server = http.server.HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+
+    # Poison the environment with a SOCKS proxy that has no socksio backing.
+    monkeypatch.setenv("ALL_PROXY", "socks5://127.0.0.1:9999")
+    monkeypatch.setenv("HTTPS_PROXY", "socks5://127.0.0.1:9999")
+    monkeypatch.setenv("HTTP_PROXY", "socks5://127.0.0.1:9999")
+
+    try:
+        from app.services.web_source_service import fetch_web_source
+
+        spec = SourceSpec(
+            source_type=SourceType.WEB_PAGE,
+            name="test_page",
+            url=f"http://127.0.0.1:{port}/",
+        )
+        bundle = fetch_web_source(spec)
+        assert bundle is not None
+        assert "Hello Test" in bundle.raw_text or len(bundle.text_blocks) >= 1
+    finally:
+        server.shutdown()
+
+    print("✓ test_web_page_preview_ignores_env_socks_proxy_by_default passed")
+
+
+def test_web_page_preview_extracts_text_and_table(monkeypatch):
+    """fetch_web_source should extract text blocks and table data from local HTML."""
+    import http.server
+    import threading
+
+    from app.schemas.source_models import SourceSpec, SourceType
+
+    HTML = (
+        b"<html><body>"
+        b"<h1>Cities</h1>"
+        b"<p>Some intro text.</p>"
+        b"<table>"
+        b"<tr><th>City</th><th>GDP</th></tr>"
+        b"<tr><td>Nanjing</td><td>18500</td></tr>"
+        b"<tr><td>Suzhou</td><td>22718</td></tr>"
+        b"</table>"
+        b"</body></html>"
+    )
+
+    class _Handler(http.server.BaseHTTPRequestHandler):
+        def do_GET(self):
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(HTML)))
+            self.end_headers()
+            self.wfile.write(HTML)
+
+        def log_message(self, *args):
+            pass
+
+    server = http.server.HTTPServer(("127.0.0.1", 0), _Handler)
+    port = server.server_address[1]
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+
+    try:
+        from app.services.web_source_service import fetch_web_source
+
+        spec = SourceSpec(
+            source_type=SourceType.WEB_PAGE,
+            name="city_table",
+            url=f"http://127.0.0.1:{port}/",
+        )
+        bundle = fetch_web_source(spec)
+        assert len(bundle.text_blocks) >= 1, "Expected at least one text block"
+        assert len(bundle.tables) >= 1, "Expected at least one table"
+        headers = bundle.tables[0].headers
+        assert "City" in headers or "city" in [h.lower() for h in headers], \
+            f"Expected 'City' column, got {headers}"
+    finally:
+        server.shutdown()
+
+    print("✓ test_web_page_preview_extracts_text_and_table passed")
+
+
+def test_web_page_rejects_non_http_scheme():
+    """fetch_web_source must reject non-http/https URLs (file://, ftp://, etc.)."""
+    from app.core.exceptions import SourceConnectError
+    from app.schemas.source_models import SourceSpec, SourceType
+    from app.services.source_connector_service import preview_sources
+    from app.services.web_source_service import fetch_web_source
+
+    for bad_url in ("file:///etc/passwd", "ftp://example.com/data"):
+        # Direct call should raise SourceConnectError.
+        try:
+            fetch_web_source(SourceSpec(source_type=SourceType.WEB_PAGE, url=bad_url))
+            assert False, f"Expected SourceConnectError for {bad_url}"
+        except SourceConnectError as exc:
+            assert "http" in str(exc).lower() or "scheme" in str(exc).lower(), \
+                f"Unexpected error message: {exc}"
+
+        # Via preview_sources it should be fail-soft (status=error, not exception).
+        previews = preview_sources(
+            [SourceSpec(source_type=SourceType.WEB_PAGE, url=bad_url)]
+        )
+        assert len(previews) == 1
+        assert previews[0].status == "error"
+
+    print("✓ test_web_page_rejects_non_http_scheme passed")
+
+
 if __name__ == "__main__":
     test_local_file_csv_preview()
     test_local_file_txt_preview()
@@ -250,4 +381,7 @@ if __name__ == "__main__":
     test_source_spec_source_type_values()
     test_no_ollama_rule_path_works()
     test_existing_fill_api_compatibility()
+    # Web page tests (monkeypatch not available outside pytest; skip env-proxy test)
+    test_web_page_preview_extracts_text_and_table(None)
+    test_web_page_rejects_non_http_scheme()
     print("\n✅ All multisource preview tests passed!")

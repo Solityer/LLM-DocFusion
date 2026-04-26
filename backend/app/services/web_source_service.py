@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import urlparse
 
 import httpx
 
@@ -10,6 +11,11 @@ from ..core.exceptions import SourceConnectError
 from ..schemas.models import DocumentBundle, FileRole, NormalizedTable, TextBlock
 from ..schemas.source_models import SourceSpec
 from ..utils.text_utils import clean_cell_value
+
+_DEFAULT_HEADERS = {
+    "User-Agent": "LLM-DocFusion/2.0 (+web_page preview)",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+}
 
 
 class _HTMLContentParser(HTMLParser):
@@ -67,13 +73,70 @@ class _HTMLContentParser(HTMLParser):
             self.text_parts.append(text)
 
 
+def _build_web_client(spec: SourceSpec) -> httpx.Client:
+    """Build an httpx.Client respecting proxy options from spec.options.
+
+    By default trust_env=False so environment SOCKS/HTTP proxies are ignored
+    and will not cause a socksio import error when that package is absent.
+
+    Explicit proxy configuration via spec.options:
+      - trust_env_proxy=True  → honour environment proxy variables
+      - proxy / proxies       → pass directly to httpx as mounts
+    """
+    timeout = max(float(spec.timeout or 20), 1.0)
+    trust_env = bool(spec.options.get("trust_env_proxy", False))
+
+    # Merge default headers with caller-supplied ones (caller wins on conflicts).
+    merged_headers = {**_DEFAULT_HEADERS, **(spec.headers or {})}
+
+    explicit_proxy: str | None = spec.options.get("proxy") or spec.options.get("proxies")
+
+    if explicit_proxy:
+        # Validate that socksio is available before attempting a SOCKS proxy.
+        lower_proxy = str(explicit_proxy).lower()
+        if lower_proxy.startswith("socks"):
+            try:
+                import socksio  # noqa: F401
+            except ImportError:
+                raise SourceConnectError(
+                    "SOCKS proxy requires installing httpx[socks] or socksio, "
+                    "or disable proxy for web_page source"
+                )
+        return httpx.Client(
+            timeout=timeout,
+            follow_redirects=True,
+            trust_env=False,
+            headers=merged_headers,
+            proxy=explicit_proxy,
+        )
+
+    return httpx.Client(
+        timeout=timeout,
+        follow_redirects=True,
+        trust_env=trust_env,
+        headers=merged_headers,
+    )
+
+
+def _validate_url_scheme(url: str) -> None:
+    """Raise SourceConnectError for non-http/https schemes."""
+    parsed = urlparse(url)
+    if parsed.scheme not in {"http", "https"}:
+        raise SourceConnectError("Web source only supports http/https URLs")
+
+
 def fetch_web_source(spec: SourceSpec) -> DocumentBundle:
     if not spec.url:
         raise SourceConnectError("Web source requires url")
+
+    _validate_url_scheme(spec.url)
+
     try:
-        with httpx.Client(timeout=max(float(spec.timeout or 20), 1.0), follow_redirects=True) as client:
-            response = client.get(spec.url, headers=spec.headers or {})
+        with _build_web_client(spec) as client:
+            response = client.get(spec.url)
             response.raise_for_status()
+    except SourceConnectError:
+        raise
     except Exception as exc:
         raise SourceConnectError(f"Web source failed: {exc}") from exc
 
